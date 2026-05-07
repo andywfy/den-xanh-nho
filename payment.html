@@ -11,48 +11,167 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+
         body {
             background: linear-gradient(135deg, #e0f7fa 0%, #80deea 100%);
             min-height: 100vh;
             padding: 15px;
         }
+
         .container {
             max-width: 420px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 150, 136, 0.2);
             padding: 25px;
         }
-        .brand-header { text-align: center; margin-bottom: 20px; }
-        .brand-logo { width: 80px; height: 56px; position: relative; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px; }
-        .conical-hat { width: 80px; height: 48px; background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%); clip-path: polygon(50% 0%, 0% 100%, 100% 100%); position: absolute; top:0; }
-        .hat-brim { width: 88px; height: 8px; background: #00796b; position: absolute; bottom:0; border-radius:50%; }
-        .brand-logo span { color:white; font-size:18px; font-weight:bold; position:relative; z-index:1; margin-top:-8px; }
-        .brand-name { font-size:24px; font-weight:bold; color:#0097a7; }
-        .brand-name-en { font-size:13px; color:#00bcd4; }
-        .lang-switch { text-align:right; margin-bottom:15px; }
-        .lang-btn { padding:5px 12px; border:2px solid #00bcd4; background:white; color:#0097a7; border-radius:15px; font-size:12px; cursor:pointer; margin-left:3px; }
-        .lang-btn.active { background:#00bcd4; color:white; }
-        h2 { text-align:center; color:#006064; margin-bottom:20px; }
-        .info-card { background:#e0f7fa; border-radius:14px; padding:20px; margin:15px 0; border-left:5px solid #00bcd4; }
-        .info-card p { margin:8px 0; font-size:15px; color:#006064; }
-        .info-card span { font-weight:bold; color:#004d40; }
-        .amount { font-size:32px; font-weight:bold; text-align:center; color:#0097a7; margin:20px 0; }
-        .qr-box { border:3px dashed #00bcd4; border-radius:15px; padding:30px; text-align:center; background:white; margin:20px 0; }
-        .qr-box p { font-size:16px; color:#006064; margin-top:10px; }
-        .btn { width:100%; padding:16px; border:none; border-radius:14px; font-size:17px; font-weight:bold; cursor:pointer; margin:10px 0; }
-        .btn-primary { background:linear-gradient(135deg, #00bcd4 0%, #0097a7 100%); color:white; }
-        .status { font-size:16px; font-weight:bold; text-align:center; margin:10px 0; }
-        .waiting { color:#f57c00; }
-        .success { color:#00c853; }
+
+        .brand-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .brand-logo {
+            width: 100px;
+            height: 70px;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .conical-hat {
+            width: 100px;
+            height: 60px;
+            background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            position: absolute;
+            top: 0;
+        }
+
+        .hat-brim {
+            width: 110px;
+            height: 10px;
+            background: linear-gradient(135deg, #0097a7 0%, #00796b 100%);
+            position: absolute;
+            bottom: 0;
+            border-radius: 50%;
+        }
+
+        .brand-logo span {
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            font-style: italic;
+            position: relative;
+            z-index: 1;
+            margin-top: -10px;
+            letter-spacing: 2px;
+        }
+
+        .brand-name {
+            font-size: 26px;
+            font-weight: 700;
+            color: #0097a7;
+            margin-bottom: 5px;
+        }
+
+        .brand-name-en {
+            font-size: 14px;
+            color: #00bcd4;
+            font-weight: 500;
+            margin-top: 3px;
+        }
+
+        .lang-switch {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+
+        .lang-btn {
+            padding: 5px 12px;
+            border: 2px solid #00bcd4;
+            background: white;
+            color: #0097a7;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 3px;
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);
+            color: white;
+        }
+
+        h2 {
+            text-align: center;
+            color: #006064;
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 22px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);
+            color: white;
+        }
+
+        .info-card {
+            background: #e0f7fa;
+            border-radius: 14px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #00bcd4;
+        }
+
+        .info-card p {
+            margin: 12px 0;
+            font-size: 15px;
+            color: #006064;
+        }
+
+        .amount {
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            color: #0097a7;
+            margin: 20px 0;
+        }
+
+        .qr-box {
+            border: 3px dashed #00bcd4;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            background: #f8f9fa;
+            margin: 20px 0;
+            font-size: 16px;
+            color: #00796b;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="lang-switch">
-            <button class="lang-btn active" onclick="setLang('vi')">Tiếng Việt</button>
-            <button class="lang-btn" onclick="setLang('en')">English</button>
-            <button class="lang-btn" onclick="setLang('zh')">中文</button>
+            <button class="lang-btn active" onclick="switchLang('vi')">Tiếng Việt</button>
+            <button class="lang-btn" onclick="switchLang('en')">English</button>
+            <button class="lang-btn" onclick="switchLang('zh')">中文</button>
         </div>
 
         <div class="brand-header">
@@ -61,93 +180,94 @@
                 <div class="hat-brim"></div>
                 <span>ĐX</span>
             </div>
-            <div class="brand-name" id="b1">Đèn Xanh Nhỏ</div>
-            <div class="brand-name-en" id="b2">Little Blue Light</div>
+            <div class="brand-name" id="brandName">Đèn Xanh Nhỏ</div>
+            <div class="brand-name-en" id="brandNameEn">Little Blue Light</div>
         </div>
 
-        <h2 id="title">Thanh toán</h2>
+        <h2 id="pageTitle">Thanh toán</h2>
 
         <div class="info-card">
-            <p id="l1">Trạm sạc: <span id="station">01</span></p>
-            <p id="l2">Phích cắm: <span id="plug">1</span></p>
-            <p id="l3">Thời gian: <span id="dur">3 giờ</span></p>
+            <p id="stationLabel">Trạm sạc：<span id="station">01</span></p>
+            <p id="plugLabel">Phích cắm：<span id="plug">1</span></p>
+            <p id="timeLabel">Thời gian：<span id="duration">3 giờ</span></p>
         </div>
 
-        <div class="amount" id="amt">10.000 VND</div>
+        <div class="amount" id="amount">10.000 VND</div>
 
-        <div class="qr-box">
-            <div style="width:200px;height:200px;background:#f0f9ff;margin:0 auto;display:flex;align-items:center;justify-content:center;color:#00796b;">
-                QUẢT MÃ THANH TOÁN
-            </div>
-            <p id="scanTip">Quét mã để thanh toán</p>
-        </div>
+        <div class="qr-box" id="qrText">Mã QR thanh toán</div>
 
-        <div class="status waiting" id="st">Đang chờ thanh toán...</div>
-
-        <button class="btn btn-primary" onclick="checkAndStart()" id="checkBtn">KIỂM TRA THANH TOÁN VÀ BẮT ĐẦU SẠC</button>
-        <button class="btn btn-primary" onclick="back()">QUAY LẠI</button>
+        <button class="btn btn-primary" onclick="checkAndStart()" id="actionBtn">Kiểm tra thanh toán và bắt đầu sạc</button>
     </div>
 
     <script>
-        let lang = 'vi';
+        const texts = {
+            vi: {
+                brandName: "Đèn Xanh Nhỏ", brandNameEn: "Little Blue Light", pageTitle: "Thanh toán",
+                stationLabel: "Trạm sạc：", plugLabel: "Phích cắm：", timeLabel: "Thời gian：",
+                qrText: "Mã QR thanh toán", actionBtn: "Kiểm tra thanh toán và bắt đầu sạc"
+            },
+            en: {
+                brandName: "Little Blue Light", brandNameEn: "Đèn Xanh Nhỏ", pageTitle: "Payment",
+                stationLabel: "Station：", plugLabel: "Plug：", timeLabel: "Duration：",
+                qrText: "Payment QR Code", actionBtn: "Check payment and start charging"
+            },
+            zh: {
+                brandName: "小蓝灯", brandNameEn: "Little Blue Light", pageTitle: "支付",
+                stationLabel: "充电桩：", plugLabel: "插头：", timeLabel: "时长：",
+                qrText: "支付二维码", actionBtn: "检查支付并开始充电"
+            }
+        };
+
+        let currentLang = 'vi';
         let order = {};
 
-        window.onload = function(){
-            let u = new URLSearchParams(window.location.search);
+        window.onload = function() {
+            const url = new URLSearchParams(location.search);
             order = {
-                station: u.get('station')||'01',
-                plug: u.get('plug')||'1',
-                duration: u.get('duration')||180,
-                amount: u.get('amount')||10000
+                station: url.get('station') || '01',
+                plug: url.get('plug') || '1',
+                duration: url.get('duration') || 180,
+                amount: url.get('amount') || 10000
             };
-            refresh();
-            setLang('vi');
-        }
+            switchLang('vi');
+        };
 
-        function refresh(){
+        function renderAll() {
+            const t = texts[currentLang];
             document.getElementById('station').innerText = order.station;
             document.getElementById('plug').innerText = order.plug;
-            document.getElementById('amt').innerText = parseInt(order.amount).toLocaleString() + ' VND';
-            let h = Math.round(order.duration/60);
-            let t = lang==='vi'? h+' giờ' : lang==='en'? h+' hours' : h+'小时';
-            document.getElementById('dur').innerText = t;
+            document.getElementById('amount').innerText = parseInt(order.amount).toLocaleString() + ' VND';
+
+            const hour = Math.round(order.duration / 60);
+            let durationText = currentLang === 'vi' ? hour + ' giờ' :
+                              currentLang === 'en' ? hour + ' hours' : hour + '小时';
+            document.getElementById('duration').innerText = durationText;
+
+            document.getElementById('stationLabel').innerText = t.stationLabel + ' ' + order.station;
+            document.getElementById('plugLabel').innerText = t.plugLabel + ' ' + order.plug;
+            document.getElementById('timeLabel').innerText = t.timeLabel + ' ' + durationText;
+            document.getElementById('qrText').innerText = t.qrText;
+            document.getElementById('actionBtn').innerText = t.actionBtn;
         }
 
-        function setLang(l){
-            lang=l;
-            let map = {
-                vi:{title:'Thanh toán',l1:'Trạm sạc:',l2:'Phích cắm:',l3:'Thời gian:',scanTip:'Quét mã để thanh toán',checkBtn:'KIỂM TRA THANH TOÁN VÀ BẮT ĐẦU SẠC',back:'QUAY LẠI',b1:'Đèn Xanh Nhỏ',b2:'Little Blue Light'},
-                en:{title:'Payment',l1:'Station:',l2:'Plug:',l3:'Duration:',scanTip:'Scan to pay',checkBtn:'CHECK PAYMENT & START CHARGE',back:'BACK',b1:'Little Blue Light',b2:'Đèn Xanh Nhỏ'},
-                zh:{title:'支付',l1:'充电桩:',l2:'插头:',l3:'时长:',scanTip:'扫码支付',checkBtn:'检查支付并开始充电',back:'返回',b1:'小蓝灯',b2:'Little Blue Light'}
-            };
-            let m=map[l];
-            document.getElementById('title').innerText=m.title;
-            document.getElementById('l1').innerHTML=m.l1+' <span id="station">'+order.station+'</span>';
-            document.getElementById('l2').innerHTML=m.l2+' <span id="plug">'+order.plug+'</span>';
-            document.getElementById('l3').innerHTML=m.l3+' <span id="dur">'+document.getElementById('dur').innerText+'</span>';
-            document.getElementById('scanTip').innerText=m.scanTip;
-            document.getElementById('checkBtn').innerText=m.checkBtn;
-            document.getElementById('back').innerText=m.back;
-            document.getElementById('b1').innerText=m.b1;
-            document.getElementById('b2').innerText=m.b2;
-            document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+        function switchLang(lang) {
+            currentLang = lang;
+            const t = texts[lang];
+
+            document.getElementById('brandName').innerText = t.brandName;
+            document.getElementById('brandNameEn').innerText = t.brandNameEn;
+            document.getElementById('pageTitle').innerText = t.pageTitle;
+
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
-            refresh();
+
+            renderAll();
         }
 
-        function checkAndStart(){
-            document.getElementById('st').innerText=lang==='vi'?'Đang kiểm tra...':lang==='en'?'Checking...':'检查支付中...';
-            setTimeout(()=>{
-                document.getElementById('st').innerText=lang==='vi'?'Thành công! Đang mở trạm sạc...':lang==='en'?'Success! Starting charger...':'支付成功！正在启动充电桩...';
-                document.getElementById('st').className='status success';
-                setTimeout(()=>{
-                    window.location.href=`index.html?station=${order.station}&paid=true&duration=${order.duration}`;
-                },1500);
-            },1500);
-        }
-
-        function back(){
-            window.location.href=`index.html?station=${order.station}`;
+        function checkAndStart() {
+            setTimeout(() => {
+                location.href = `index.html?station=${order.station}&paid=true&duration=${order.duration}`;
+            }, 1500);
         }
     </script>
 </body>
