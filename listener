@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>充电桩自动监听主控</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0a;
+            color: #00ff00;
+            font-family: 'Consolas', 'Monaco', monospace;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #00ff00;
+            padding-bottom: 10px;
+        }
+        .log {
+            background: #1a1a1a;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border-left: 3px solid #00ff00;
+        }
+        .error { border-left-color: #ff0000; color: #ff0000; }
+        .success { border-left-color: #00ff00; }
+    </style>
+</head>
+<body>
+    <div class="header">🔌 充电桩自动监听主控（电脑保持此页面打开）</div>
+    <div id="logContainer"></div>
+
+    <script>
+        // ==============================================
+        // 👇👇👇 充电机配置中心（加新设备只改这里）👇👇👇
+        // ==============================================
+        const CHARGER_CONFIG = {
+            "01": { id: "79490", cd: "862741082710969" }, // 小蓝灯1号
+            "02": { id: "", cd: "" }, // 未来加2号
+            "03": { id: "", cd: "" }, // 未来加3号
+        };
+
+        const API_URL = "https://cdz.xiaoyouwulian.com/web-wechart/agent/charge/equipment/net/remote/net/remote/send";
+        const TOKEN = "fc50d8c9-736b-4f09-b731-1ee69f2d4f59";
+        // ==============================================
+        // 👆👆👆 以上是唯一需要修改的地方 👆👆👆
+        // ==============================================
+
+        let lastOrderTime = 0;
+
+        // 每秒检查一次新订单
+        setInterval(checkNewOrder, 1000);
+
+        function checkNewOrder() {
+            const orderData = localStorage.getItem("CHARGE_ORDER");
+            if (!orderData) return;
+
+            const order = JSON.parse(orderData);
+            // 防止重复处理同一个订单
+            if (order.time <= lastOrderTime) return;
+
+            lastOrderTime = order.time;
+            addLog(`📥 收到新订单：充电桩${order.station} | 插头${order.plug} | 时长${Math.round(order.duration/60)}小时`);
+            
+            // 发送充电指令
+            sendChargeCommand(order);
+            
+            // 清空订单，避免重复处理
+            localStorage.removeItem("CHARGE_ORDER");
+        }
+
+        function sendChargeCommand(order) {
+            const charger = CHARGER_CONFIG[order.station];
+            if (!charger) {
+                addLog(`❌ 错误：充电桩${order.station}未配置`, "error");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('id', charger.id);
+            formData.append('cd', charger.cd);
+            formData.append('port', order.plug);
+            formData.append('time', order.duration);
+            formData.append('token', TOKEN);
+
+            fetch(API_URL, {
+                method: 'POST',
+                body: formData,
+                credentials: 'include' // 自动带上小蓝灯的登录Cookie
+            })
+            .then(() => {
+                addLog(`✅ 指令发送成功！充电桩${order.station} 插头${order.plug} 已启动`, "success");
+            })
+            .catch(error => {
+                addLog(`❌ 发送失败：${error.message}`, "error");
+            });
+        }
+
+        function addLog(message, type = "info") {
+            const logDiv = document.createElement('div');
+            logDiv.className = `log ${type}`;
+            logDiv.innerText = `[${new Date().toLocaleString()}] ${message}`;
+            document.getElementById('logContainer').prepend(logDiv);
+        }
+
+        // 页面加载时显示启动日志
+        addLog("✅ 监听服务已启动，等待用户支付订单...");
+    </script>
+</body>
+</html>
