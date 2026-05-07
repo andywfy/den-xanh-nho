@@ -200,21 +200,41 @@
     </div>
 
     <script>
+        // ==============================================
+        // 👇👇👇 充电机配置中心（未来加新设备只改这里）👇👇👇
+        // ==============================================
+        const CHARGER_CONFIG = {
+            // 格式："用户扫码的桩号": { id: "设备ID", cd: "设备编号" }
+            "01": { id: "79490", cd: "862741082710969" }, // 小蓝灯1号
+            "02": { id: "这里填2号的id", cd: "这里填2号的cd" }, // 未来加2号
+            "03": { id: "这里填3号的id", cd: "这里填3号的cd" }, // 未来加3号
+            // 继续加4号、5号...
+        };
+
+        // 你的登录令牌（过期了只需要更新这里）
+        const API_TOKEN = "fc50d8c9-736b-4f09-b731-1ee69f2d4f59";
+        // ==============================================
+        // 👆👆👆 以上是唯一需要修改的地方 👆👆👆
+        // ==============================================
+
         const texts = {
             vi: {
                 brandName: "Đèn Xanh Nhỏ", brandNameEn: "Little Blue Light", pageTitle: "Thanh toán",
                 stationLabel: "Trạm sạc：", plugLabel: "Phích cắm：", timeLabel: "Thời gian：",
-                qrText: "Mã QR thanh toán", actionBtn: "Kiểm tra thanh toán và bắt đầu sạc"
+                qrText: "Mã QR thanh toán", actionBtn: "Kiểm tra thanh toán và bắt đầu sạc",
+                starting: "Đang khởi động...", success: "Trạm sạc đã khởi động!", error: "Khởi động thất bại"
             },
             en: {
                 brandName: "Little Blue Light", brandNameEn: "Đèn Xanh Nhỏ", pageTitle: "Payment",
                 stationLabel: "Station：", plugLabel: "Plug：", timeLabel: "Duration：",
-                qrText: "Payment QR Code", actionBtn: "Check payment and start charging"
+                qrText: "Payment QR Code", actionBtn: "Check payment and start charging",
+                starting: "Starting...", success: "Charger started!", error: "Start failed"
             },
             zh: {
                 brandName: "小蓝灯", brandNameEn: "Little Blue Light", pageTitle: "支付",
                 stationLabel: "充电桩：", plugLabel: "插头：", timeLabel: "时长：",
-                qrText: "支付二维码", actionBtn: "检查支付并开始充电"
+                qrText: "支付二维码", actionBtn: "检查支付并开始充电",
+                starting: "正在启动...", success: "充电机启动成功！", error: "启动失败"
             }
         };
 
@@ -265,9 +285,50 @@
         }
 
         function checkAndStart() {
-            setTimeout(() => {
-                location.href = `index.html?station=${order.station}&paid=true&duration=${order.duration}`;
-            }, 1500);
+            const t = texts[currentLang];
+            const charger = CHARGER_CONFIG[order.station];
+
+            // 检查设备是否配置
+            if (!charger) {
+                alert(t.error + ": 设备未配置");
+                return;
+            }
+
+            // 禁用按钮，显示启动中
+            document.getElementById('actionBtn').innerText = t.starting;
+            document.getElementById('actionBtn').disabled = true;
+
+            // 构建远程控制请求（完全按照你抓包的格式）
+            const formData = new FormData();
+            formData.append('id', charger.id); // 自动对应设备ID
+            formData.append('cd', charger.cd); // 自动对应设备编号
+            formData.append('port', order.plug); // 动态插头号
+            formData.append('time', order.duration); // 动态充电时长
+            formData.append('token', API_TOKEN); // 你的登录令牌
+
+            // 发送远程启动请求
+            fetch('https://cdz.xiaoyouwulian.com/web-wechart/agent/charge/equipment/net/remote/net/remote/send', {
+                method: 'POST',
+                body: formData,
+                credentials: 'include' // 自动带上登录Cookie
+            })
+            .then(response => response.text())
+            .then(result => {
+                console.log('充电机启动成功:', result);
+                alert(t.success);
+
+                // 跳回用户充电页面
+                setTimeout(() => {
+                    location.href = `index.html?station=${order.station}&paid=true&duration=${order.duration}`;
+                }, 1000);
+            })
+            .catch(error => {
+                console.error('启动失败:', error);
+                alert(t.error);
+                // 恢复按钮
+                document.getElementById('actionBtn').disabled = false;
+                document.getElementById('actionBtn').innerText = t.actionBtn;
+            });
         }
     </script>
 </body>
