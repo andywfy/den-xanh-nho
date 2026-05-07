@@ -1,70 +1,70 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thanh toán - Đèn Xanh Nhỏ</title>
+    <title>主控监听 - 自动充电</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: linear-gradient(135deg, #e0f7fa 0%, #80deea 100%); min-height: 100vh; padding: 15px; }
-        .container { max-width: 420px; margin: 0 auto; background: white; border-radius: 20px; padding: 25px; }
-        .lang-switch { text-align: right; margin-bottom: 15px; }
-        .lang-btn { padding: 5px 12px; border: 2px solid #00bcd4; background: white; color: #0097a7; border-radius: 15px; font-size: 12px; cursor: pointer; }
-        .info-card { background: #e0f7fa; border-radius: 14px; padding: 20px; margin: 20px 0; }
-        .amount { font-size: 32px; font-weight: bold; text-align: center; color: #0097a7; margin: 20px 0; }
-        .qr-box { border: 3px dashed #00bcd4; padding: 30px; border-radius: 15px; text-align: center; background: #f8f9fa; margin: 20px 0; }
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 17px; font-weight: 600; background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%); color: white; cursor: pointer; }
+        body{background:#111;color:#0f0;font-family: monospace;padding:20px;font-size:16px;}
+        .log{margin:10px 0;padding:10px;background:#222;border-radius:6px;}
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="lang-switch">
-        <button class="lang-btn" onclick="setLang('vi')">Tiếng Việt</button>
-        <button class="lang-btn" onclick="setLang('en')">English</button>
-        <button class="lang-btn" onclick="setLang('zh')">中文</button>
-    </div>
-    <h2 id="title">Thanh toán</h2>
-    <div class="info-card">
-        <p id="t_station">Trạm sạc: <span id="station">01</span></p>
-        <p id="t_plug">Phích cắm: <span id="plug">1</span></p>
-        <p id="t_time">Thời gian: <span id="duration">3 giờ</span></p>
-    </div>
-    <div class="amount" id="amount">10000 VND</div>
-    <div class="qr-box" id="qr">Mã QR thanh toán</div>
-    <button class="btn" onclick="sendOrder()" id="startBtn">Bắt đầu sạc</button>
-</div>
+    <h2>🔌 充电桩自动监听主控（电脑保持打开）</h2>
+    <div id="log"></div>
 
 <script>
-    const order = new URLSearchParams(location.search);
-    const station = order.get('station')||'01';
-    const plug = order.get('plug')||'1';
-    const duration = order.get('duration')||'180';
-
-    const texts = {
-        vi:{title:"Thanh toán",station:"Trạm sạc",plug:"Phích cắm",time:"Thời gian",qr:"Mã QR",btn:"Bắt đầu sạc"},
-        en:{title:"Payment",station:"Station",plug:"Plug",time:"Duration",qr:"QR Code",btn:"Start charging"},
-        zh:{title:"支付",station:"充电桩",plug:"插头",time:"时长",qr:"支付二维码",btn:"检查支付并开始充电"}
+    // 充电桩配置
+    const CHARGER_CONFIG = {
+        "01": { id: "79490", cd: "862741082710969" }
     };
 
-    let lang='vi';
-    function setLang(l){lang=l;const t=texts[lang];
-        document.getElementById('title').innerText=t.title;
-        document.getElementById('t_station').innerText=t.station+': '+station;
-        document.getElementById('t_plug').innerText=t.plug+': '+plug;
-        document.getElementById('t_time').innerText=t.time+': '+Math.round(duration/60)+' giờ';
-        document.getElementById('qr').innerText=t.qr;
-        document.getElementById('startBtn').innerText=t.btn;
+    const API_URL = "https://cdz.xiaoyouwulian.com/web-wechart/agent/charge/equipment/net/remote/net/remote/send";
+    const TOKEN = "fc50d8c9-736b-4f09-b731-1ee69f2d4f59";
+
+    // 页面加载自动执行
+    window.onload = function() {
+        const url = new URLSearchParams(location.search);
+        const station = url.get('station');
+        const plug = url.get('plug');
+        const duration = url.get('duration');
+
+        if(!station || !plug || !duration) {
+            addLog("✅ 监听已启动，等待用户支付...");
+            return;
+        }
+
+        addLog("📥 收到订单: 桩"+station+" 插头"+plug+" 时长"+duration+"分钟");
+        sendCharge({station, plug, duration});
     }
 
-    function sendOrder(){
-        localStorage.setItem("CHARGE_ORDER", JSON.stringify({
-            station:station, plug:plug, duration:duration, time:new Date().getTime()
-        }));
-        alert("Đã gửi lệnh! Máy sẽ tự sạc!");
-        location.href=`index.html?station=${station}&paid=true&duration=${duration}`;
+    function sendCharge(order){
+        const charger = CHARGER_CONFIG[order.station];
+        if(!charger){ addLog("❌ 设备未配置"); return; }
+
+        const formData = new FormData();
+        formData.append('id', charger.id);
+        formData.append('cd', charger.cd);
+        formData.append('port', order.plug);
+        formData.append('time', order.duration);
+        formData.append('token', TOKEN);
+
+        fetch(API_URL, { method: 'POST', body: formData, credentials: 'include' })
+        .then(() => {
+            addLog("✅ 指令发送成功 → 充电桩已启动！");
+            // ✅ 发送成功后自动关闭窗口，不留痕迹
+            setTimeout(() => window.close(), 1000);
+        })
+        .catch(e => {
+            addLog("❌ 发送失败："+e);
+        });
     }
 
-    setLang('vi');
+    function addLog(msg){
+        const d = document.createElement("div");
+        d.className = "log";
+        d.innerText = new Date().toLocaleString() + " | " + msg;
+        document.getElementById("log").prepend(d);
+    }
 </script>
 </body>
 </html>
