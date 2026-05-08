@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đèn Xanh Nhỏ - Trạm sạc xe điện</title>
+    <title>小蓝灯 - 充电桩控制中心</title>
     <style>
         * {
             margin: 0;
@@ -11,359 +11,265 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
         body {
-            background: linear-gradient(135deg, #e0f7fa 0%, #80deea 100%);
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
             min-height: 100vh;
-            padding: 15px;
+            padding: 20px;
         }
-
         .container {
-            max-width: 420px;
+            max-width: 800px;
             margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 150, 136, 0.2);
-            padding: 25px;
-        }
-
-        .brand-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .brand-logo {
-            width: 100px;
-            height: 70px;
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-
-        .conical-hat {
-            width: 100px;
-            height: 60px;
-            background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);
-            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-            position: absolute;
-            top: 0;
-        }
-
-        .hat-brim {
-            width: 110px;
-            height: 10px;
-            background: linear-gradient(135deg, #0097a7 0%, #00796b 100%);
-            position: absolute;
-            bottom: 0;
-            border-radius: 50%;
-        }
-
-        .brand-logo span {
-            color: white;
-            font-size: 22px;
-            font-weight: 700;
-            font-style: italic;
-            position: relative;
-            z-index: 1;
-            margin-top: -10px;
-            letter-spacing: 2px;
-        }
-
-        .brand-name {
-            font-size: 26px;
-            font-weight: 700;
-            color: #0097a7;
-            margin-bottom: 5px;
-        }
-
-        .brand-name-en {
-            font-size: 14px;
-            color: #00bcd4;
-            font-weight: 500;
-            margin-top: 3px;
-        }
-
-        .lang-switch {
-            text-align: right;
-            margin-bottom: 15px;
-        }
-
-        .lang-btn {
-            padding: 5px 12px;
-            border: 2px solid #00bcd4;
-            background: white;
-            color: #0097a7;
+            background: rgba(0,0,0,0.7);
             border-radius: 15px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-left: 3px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-
-        .lang-btn.active {
-            background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);
-            color: white;
-        }
-
-        h2 {
+        h1 {
             text-align: center;
-            color: #006064;
-            margin-bottom: 20px;
-            font-weight: 600;
-            font-size: 22px;
+            margin-bottom: 30px;
+            color: #4CAF50;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
         }
-
-        .btn {
-            width: 100%;
-            padding: 16px;
-            margin: 10px 0;
+        .status {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+        }
+        .status.online {
+            color: #4CAF50;
+        }
+        .status.offline {
+            color: #f44336;
+        }
+        .settings {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+        }
+        .settings label {
+            display: inline-block;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        .settings input {
+            padding: 8px;
             border: none;
-            border-radius: 14px;
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
+            border-radius: 4px;
+            width: 80px;
+            font-size: 16px;
+        }
+        .ports {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .port-card {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
             transition: all 0.3s ease;
         }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);
+        .port-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .port-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .port-status {
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #ccc;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+        }
+        .btn-start {
+            background-color: #4CAF50;
             color: white;
         }
-
-        .info-card {
-            background: #e0f7fa;
-            border-radius: 14px;
-            padding: 20px;
-            margin: 20px 0;
-            border-left: 5px solid #00bcd4;
+        .btn-start:hover {
+            background-color: #45a049;
         }
-
-        .info-card p {
-            margin: 12px 0;
-            font-size: 15px;
-            color: #006064;
+        .btn-stop {
+            background-color: #f44336;
+            color: white;
         }
-
-        .info-card span {
-            font-weight: 700;
-            color: #004d40;
+        .btn-stop:hover {
+            background-color: #d32f2f;
         }
-
-        .station-display {
-            background: #b2ebf2;
-            border-radius: 10px;
+        .btn:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+        .logs {
+            background: rgba(0,0,0,0.5);
             padding: 15px;
-            margin-bottom: 15px;
-            text-align: center;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 14px;
         }
-
-        .station-display p {
-            font-size: 16px;
-            color: #00796b;
-            margin: 0;
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-radius: 4px;
         }
-
-        .station-number {
-            font-size: 24px;
-            font-weight: 700;
-            color: #0097a7;
-            margin-top: 5px;
+        .log-info {
+            color: #fff;
+            background: rgba(255,255,255,0.1);
         }
-
-        select {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid #b2ebf2;
-            border-radius: 12px;
-            font-size: 16px;
-            color: #006064;
-            background: white;
+        .log-success {
+            color: #4CAF50;
+            background: rgba(76, 175, 80, 0.1);
         }
-
-        .select-label {
-            font-size: 15px;
-            font-weight: 600;
-            color: #00796b;
-            margin-top: 12px;
-            display: block;
-        }
-
-        .duration-card {
-            background: #f0f9ff;
-            border-radius: 12px;
-            padding: 18px;
-            margin: 15px 0;
-            border: 2px solid #bae6fd;
-        }
-
-        .duration-option {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            margin: 8px 0;
-            background: white;
-            border-radius: 10px;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-
-        .duration-option:hover {
-            border-color: #00bcd4;
-            background: #e0f7fa;
-        }
-
-        .duration-option.selected {
-            border-color: #0097a7;
-            background: #b2ebf2;
-        }
-
-        .duration-text {
-            font-size: 16px;
-            font-weight: 600;
-            color: #006064;
-        }
-
-        .price-text {
-            font-size: 18px;
-            font-weight: 700;
-            color: #0097a7;
+        .log-error {
+            color: #f44336;
+            background: rgba(244, 67, 54, 0.1);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="lang-switch">
-            <button class="lang-btn active" onclick="switchLang('vi')">Tiếng Việt</button>
-            <button class="lang-btn" onclick="switchLang('en')">English</button>
-            <button class="lang-btn" onclick="switchLang('zh')">中文</button>
-        </div>
-
-        <div class="brand-header">
-            <div class="brand-logo">
-                <div class="conical-hat"></div>
-                <div class="hat-brim"></div>
-                <span>ĐX</span>
-            </div>
-            <div class="brand-name" id="brandName">Đèn Xanh Nhỏ</div>
-            <div class="brand-name-en" id="brandNameEn">Little Blue Light</div>
-        </div>
-
-        <h2 id="pageTitle">Quét mã sạc</h2>
+        <h1>⚡ 小蓝灯 - 充电桩控制中心</h1>
         
-        <div class="info-card">
-            <div class="station-display">
-                <p id="stationLabel">Trạm sạc hiện tại：</p>
-                <div class="station-number" id="stationNumber">Trạm sạc 01</div>
-            </div>
-
-            <label class="select-label" id="plugLabel">Chọn phích cắm：</label>
-            <select id="plugSelect">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-                <option value="9">9</option>
-                <option value="10">10</option>
-            </select>
-        </div>
-
-        <div class="duration-card">
-            <p class="select-label" id="durationLabel">Chọn gói sạc：</p>
-            
-            <div class="duration-option selected" onclick="selectDuration(this, 3, 10000)">
-                <span class="duration-text" id="duration1">3 giờ</span>
-                <span class="price-text">10.000 VND</span>
-            </div>
-            
-            <div class="duration-option" onclick="selectDuration(this, 6, 20000)">
-                <span class="duration-text" id="duration2">6 giờ</span>
-                <span class="price-text">20.000 VND</span>
-            </div>
-            
-            <div class="duration-option" onclick="selectDuration(this, 9, 30000)">
-                <span class="duration-text" id="duration3">9 giờ</span>
-                <span class="price-text">30.000 VND</span>
-            </div>
-        </div>
+        <div class="status online">✅ 服务状态：已连接到Render后端</div>
         
-        <button class="btn btn-primary" onclick="startCharge()" id="startBtn">Thanh toán và sạc ngay</button>
+        <div class="settings">
+            <label for="defaultDuration">默认充电时长（分钟）：</label>
+            <input type="number" id="defaultDuration" value="60" min="1" max="1440">
+        </div>
+
+        <div class="ports">
+            <div class="port-card">
+                <div class="port-title">端口 1</div>
+                <div class="port-status" id="status-1">状态：待机</div>
+                <button class="btn btn-start" onclick="startPort(1)">启动</button>
+                <button class="btn btn-stop" onclick="stopPort(1)">停止</button>
+            </div>
+            <div class="port-card">
+                <div class="port-title">端口 2</div>
+                <div class="port-status" id="status-2">状态：待机</div>
+                <button class="btn btn-start" onclick="startPort(2)">启动</button>
+                <button class="btn btn-stop" onclick="stopPort(2)">停止</button>
+            </div>
+            <div class="port-card">
+                <div class="port-title">端口 3</div>
+                <div class="port-status" id="status-3">状态：待机</div>
+                <button class="btn btn-start" onclick="startPort(3)">启动</button>
+                <button class="btn btn-stop" onclick="stopPort(3)">停止</button>
+            </div>
+            <div class="port-card">
+                <div class="port-title">端口 4</div>
+                <div class="port-status" id="status-4">状态：待机</div>
+                <button class="btn btn-start" onclick="startPort(4)">启动</button>
+                <button class="btn btn-stop" onclick="stopPort(4)">停止</button>
+            </div>
+        </div>
+
+        <h3 style="margin-bottom:10px;">操作日志</h3>
+        <div class="logs" id="logs">
+            <div class="log-entry log-info">[系统] 控制中心已就绪，可开始操作</div>
+        </div>
     </div>
 
     <script>
-        const texts = {
-            vi: {
-                brandName: "Đèn Xanh Nhỏ", brandNameEn: "Little Blue Light", pageTitle: "Quét mã sạc",
-                stationLabel: "Trạm sạc hiện tại：", plugLabel: "Chọn phích cắm：", durationLabel: "Chọn gói sạc：",
-                duration1: "3 giờ", duration2: "6 giờ", duration3: "9 giờ", startBtn: "Thanh toán và sạc ngay"
-            },
-            en: {
-                brandName: "Little Blue Light", brandNameEn: "Đèn Xanh Nhỏ", pageTitle: "Scan to Charge",
-                stationLabel: "Current Station：", plugLabel: "Select Plug：", durationLabel: "Select Plan：",
-                duration1: "3 hours", duration2: "6 hours", duration3: "9 hours", startBtn: "Pay & Charge"
-            },
-            zh: {
-                brandName: "小蓝灯", brandNameEn: "Little Blue Light", pageTitle: "扫码充电",
-                stationLabel: "当前充电桩：", plugLabel: "选择插头：", durationLabel: "选择充电套餐：",
-                duration1: "3小时", duration2: "6小时", duration3: "9小时", startBtn: "支付并充电"
+        // 后端API地址（你的Render服务地址）
+        const API_BASE_URL = "https://charger-control-api.onrender.com";
+
+        // 添加日志
+        function addLog(message, type = "info") {
+            const logsDiv = document.getElementById("logs");
+            const logEntry = document.createElement("div");
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logsDiv.appendChild(logEntry);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+
+        // 更新端口状态
+        function updatePortStatus(port, status) {
+            document.getElementById(`status-${port}`).textContent = `状态：${status}`;
+        }
+
+        // 启动端口
+        async function startPort(port) {
+            const duration = document.getElementById("defaultDuration").value;
+            addLog(`收到启动请求：端口${port}，时长${duration}分钟`);
+            updatePortStatus(port, "启动中...");
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/start`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ port: port, duration: duration })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    addLog(`✅ 端口${port}启动成功！`, "success");
+                    updatePortStatus(port, "充电中");
+                } else {
+                    addLog(`❌ 端口${port}启动失败：${result.error || "未知错误"}`, "error");
+                    updatePortStatus(port, "启动失败");
+                }
+            } catch (error) {
+                addLog(`❌ 请求失败：${error.message}`, "error");
+                updatePortStatus(port, "请求失败");
             }
-        };
+        }
 
-        let currentLang = 'vi';
-        let selectedDuration = 180;
-        let selectedAmount = 10000;
-        let currentStation = "01";
+        // 停止端口
+        async function stopPort(port) {
+            addLog(`收到停止请求：端口${port}`);
+            updatePortStatus(port, "停止中...");
 
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/stop`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ port: port })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    addLog(`✅ 端口${port}停止成功！`, "success");
+                    updatePortStatus(port, "已停止");
+                } else {
+                    addLog(`❌ 端口${port}停止失败：${result.error || "未知错误"}`, "error");
+                    updatePortStatus(port, "停止失败");
+                }
+            } catch (error) {
+                addLog(`❌ 请求失败：${error.message}`, "error");
+                updatePortStatus(port, "请求失败");
+            }
+        }
+
+        // 页面加载时初始化
         window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const station = urlParams.get('station');
-            if (station) currentStation = station;
-            updateStationDisplay();
-            switchLang('vi');
-        }
-
-        function updateStationDisplay() {
-            let name = currentLang === 'zh' ? `充电桩 ${currentStation}` :
-                       currentLang === 'en' ? `Station ${currentStation}` :
-                       `Trạm sạc ${currentStation}`;
-            document.getElementById('stationNumber').textContent = name;
-        }
-
-        function switchLang(lang) {
-            currentLang = lang;
-            const t = texts[lang];
-            document.getElementById('brandName').textContent = t.brandName;
-            document.getElementById('brandNameEn').textContent = t.brandNameEn;
-            document.getElementById('pageTitle').textContent = t.pageTitle;
-            document.getElementById('stationLabel').textContent = t.stationLabel;
-            document.getElementById('plugLabel').textContent = t.plugLabel;
-            document.getElementById('durationLabel').textContent = t.durationLabel;
-            document.getElementById('duration1').textContent = t.duration1;
-            document.getElementById('duration2').textContent = t.duration2;
-            document.getElementById('duration3').textContent = t.duration3;
-            document.getElementById('startBtn').textContent = t.startBtn;
-            updateStationDisplay();
-            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-        }
-
-        function selectDuration(el, hours, price) {
-            document.querySelectorAll('.duration-option').forEach(o => o.classList.remove('selected'));
-            el.classList.add('selected');
-            selectedDuration = hours * 60;
-            selectedAmount = price;
-        }
-
-        function startCharge() {
-            const plug = document.getElementById('plugSelect').value;
-            window.location.href = `payment.html?station=${currentStation}&plug=${plug}&duration=${selectedDuration}&amount=${selectedAmount}`;
-        }
+            addLog("系统初始化完成，已连接到后端服务", "success");
+        };
     </script>
 </body>
 </html>
