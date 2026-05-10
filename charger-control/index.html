@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>充电桩控制中心</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 20px;
+            background-color: #f5f5f5;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .card h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .info-item {
+            margin: 15px 0;
+        }
+        .info-item label {
+            display: block;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .info-item input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .port-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .port-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .port-number {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+        .btn.start {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn.stop {
+            background-color: #f44336;
+            color: white;
+        }
+        #logs {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>⚙️ 设备信息</h2>
+        <div class="info-item">
+            <label>设备IMEI</label>
+            <input type="text" id="imei" value="862741082710969" readonly>
+        </div>
+        <div class="info-item">
+            <label>设备ID</label>
+            <input type="text" id="deviceId" value="79490" readonly>
+        </div>
+        <div class="info-item">
+            <label>默认充电时长（分钟）</label>
+            <input type="number" id="defaultDuration" value="60">
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🎮 端口控制</h2>
+        <div class="port-grid" id="portGrid"></div>
+    </div>
+
+    <div class="card">
+        <h2>📋 操作日志</h2>
+        <div id="logs"></div>
+    </div>
+
+    <script>
+        // 生成10个端口按钮
+        const portGrid = document.getElementById('portGrid');
+        for (let i = 1; i <= 10; i++) {
+            const portCard = document.createElement('div');
+            portCard.className = 'port-card';
+            portCard.innerHTML = `
+                <div class="port-number">${i}</div>
+                <button class="btn start" onclick="startPort(${i})">启动</button>
+                <button class="btn stop" onclick="stopPort(${i})">停止</button>
+            `;
+            portGrid.appendChild(portCard);
+        }
+
+        // 日志函数
+        function addLog(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const logItem = document.createElement('div');
+            logItem.style.color = type === 'error' ? '#ff4444' : type === 'success' ? '#4CAF50' : '#00ff00';
+            logItem.textContent = `[${new Date().toLocaleString()}] ${message}`;
+            logsDiv.appendChild(logItem);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+
+        // 启动端口
+        async function startPort(port) {
+            const duration = document.getElementById('defaultDuration').value;
+            addLog(`收到启动请求：端口${port}，时长${duration}分钟`);
+            
+            try {
+                const response = await fetch('/api/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ port, duration })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    addLog(`✅ 端口${port}启动成功！`, 'success');
+                } else {
+                    addLog(`❌ 端口${port}启动失败`, 'error');
+                }
+            } catch (error) {
+                addLog(`❌ 请求失败：${error.message}`, 'error');
+            }
+        }
+
+        // 停止端口
+        async function stopPort(port) {
+            addLog(`收到停止请求：端口${port}`);
+            
+            try {
+                const response = await fetch('/api/stop', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ port })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    addLog(`✅ 端口${port}停止成功！`, 'success');
+                } else {
+                    addLog(`❌ 端口${port}停止失败`, 'error');
+                }
+            } catch (error) {
+                addLog(`❌ 请求失败：${error.message}`, 'error');
+            }
+        }
+
+        // 页面加载时获取日志
+        window.onload = async function() {
+            const response = await fetch('/api/logs');
+            const logs = await response.json();
+            logs.reverse().forEach(log => addLog(log.message, log.type));
+        }
+    </script>
+</body>
+</html>

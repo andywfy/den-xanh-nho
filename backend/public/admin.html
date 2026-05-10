@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue Light - Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+        body { background: #0a0a0a; min-height: 100vh; padding: 15px; }
+        .container { max-width: 1100px; margin: 0 auto; background: #111; border-radius: 20px; padding: 20px; border: 1px solid #1a3a4a; position: relative; }
+        .lang-switch { position: absolute; top: 15px; left: 15px; display: flex; gap: 6px; z-index: 10; }
+        .lang-btn { padding: 4px 10px; border: 1px solid #2a4a5a; background: #1a2a3a; color: #5a8a9a; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .lang-btn.active { background: #00d4ff; color: #000; border-color: #00d4ff; }
+        .brand-header { text-align: center; margin-bottom: 15px; }
+        .brand-logo {width: 80px; height: 80px; margin: 0 auto 8px; background: #000; }
+        .brand-logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 0; background: none; }
+        .brand-name { font-size: 22px; font-weight: 700; color: #00d4ff; text-shadow: 0 0 15px #00d4ff50; }
+        .brand-sub { font-size: 13px; color: #5a8a9a; margin-top: 4px; }
+        .nav-bar { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
+        .nav-btn { padding: 8px 14px; border: 1px solid #2a4a5a; background: #1a2a3a; color: #5a8a9a; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .nav-btn.active { background: #00d4ff; color: #000; border-color: #00d4ff; }
+        .nav-btn:hover { border-color: #00d4ff; }
+        .section { display: none; }
+        .section.active { display: block; }
+        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
+        @media(min-width: 600px) { .stat-grid { grid-template-columns: repeat(4, 1fr); } }
+        .stat-item { background: #1a2a3a; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #2a4a5a; }
+        .stat-value { font-size: 20px; font-weight: 700; color: #00d4ff; }
+        .stat-label { font-size: 11px; color: #5a8a9a; margin-top: 4px; }
+        .card { background: #1a2a3a; border-radius: 12px; padding: 15px; margin: 10px 0; border: 1px solid #2a4a5a; }
+        .card-title { color: #00d4ff; margin-bottom: 12px; font-size: 14px; font-weight: 600; }
+        .list-item { background: #0a1520; padding: 12px; border-radius: 8px; margin: 8px 0; border: 1px solid #2a4a5a; }
+        .charger-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .charger-name { color: #00d4ff; font-size: 14px; font-weight: 600; }
+        .charger-info { font-size: 11px; color: #5a8a9a; margin-top: 2px; }
+        .ports-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin-top: 10px; }
+        .port-status-item { padding: 6px 2px; border-radius: 4px; text-align: center; font-size: 10px; background: #1a2a3a; border: 1px solid #2a4a5a; }
+        .port-status-item.idle { border-color: #4caf50; background: #0a2010; }
+        .port-status-item.charging { border-color: #ffa500; background: #2a2010; }
+        .port-num { font-size: 12px; font-weight: 700; color: #00d4ff; }
+        .port-label { font-size: 8px; color: #5a8a9a; margin-top: 2px; }
+        .port-status-item.idle .port-label { color: #4caf50; }
+        .port-status-item.charging .port-label { color: #ffa500; }
+        .control-btn { padding: 2px 6px; border: none; border-radius: 4px; font-size: 9px; font-weight: 600; cursor: pointer; margin-top: 2px; }
+        .control-btn.start { background: #4caf50; color: #fff; }
+        .control-btn.stop { background: #ff6b6b; color: #fff; }
+        .control-btn:disabled { opacity: 0.4; }
+        .badge { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; }
+        .badge-active { background: #1a3a4a; color: #4caf50; }
+        .badge-pending { background: #3a2a1a; color: #ffa500; }
+        .badge-disabled { background: #3a1a1a; color: #ff6b6b; }
+        .form-group { margin: 12px 0; }
+        .form-label { font-size: 12px; color: #00d4ff; font-weight: 600; display: block; margin-bottom: 6px; }
+        .form-input { width: 100%; padding: 10px; border: 1px solid #2a4a5a; border-radius: 8px; font-size: 14px; background: #0a1520; color: #fff; outline: none; }
+        .form-input:focus { border-color: #00d4ff; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; margin: 8px 0; }
+        .btn-primary { background: linear-gradient(135deg, #00d4ff 0%, #0088aa 100%); color: #000; }
+        .btn-secondary { background: #2a3a4a; color: #5a8a9a; border: 1px solid #2a4a5a; }
+        .btn-export { background: #4caf50; color: #fff; padding: 8px 14px; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; margin: 3px; }
+        .btn-export:hover { background: #388e3c; }
+        .login-box { max-width: 360px; margin: 0 auto; }
+        .table-scroll { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #2a4a5a; white-space: nowrap; }
+        th { background: #0a1520; color: #00d4ff; }
+        td { color: #8ab4c4; }
+        .detail-btn { background: #0a2a3a; color: #00d4ff; border: 1px solid #2a4a5a; padding: 6px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; margin-top: 10px; width: 100%; }
+        .detail-btn:hover { background: #1a3a5a; }
+        .port-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 10px 0; }
+        @media(max-width: 500px) { .port-grid { grid-template-columns: repeat(2, 1fr); } }
+        .port-item { background: #0a1520; border: 1px solid #2a4a5a; border-radius: 8px; padding: 8px; text-align: center; }
+        .port-item.port-idle { border-color: #4caf50; background: #0a2010; }
+        .port-item.port-charging { border-color: #ffa500; background: #2a2010; }
+        .port-item.port-occupied { border-color: #888; background: #1a1a1a; }
+        .port-item .port-num { display: block; color: #00d4ff; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+        .port-item .port-status { display: block; font-size: 10px; margin-bottom: 6px; }
+        .port-idle .port-status { color: #4caf50; }
+        .port-charging .port-status { color: #ffa500; }
+        .port-occupied .port-status { color: #888; }
+        .port-controls { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; }
+        .mini-btn { padding: 3px 8px; border: none; border-radius: 4px; font-size: 10px; font-weight: 600; cursor: pointer; background: #2a4a5a; color: #8ab4c4; }
+        .mini-btn:hover { background: #3a5a6a; }
+        .mini-btn.stop { background: #ff6b6b; color: #fff; }
+        .mini-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .logout-btn { position: absolute; top: 15px; right: 15px; padding: 6px 12px; background: #ff6b6b; color: #fff; border: none; border-radius: 6px; font-size: 11px; cursor: pointer; }
+        .header-wrap { position: relative; }
+        .empty-tip { text-align: center; color: #5a8a9a; padding: 30px; font-size: 13px; }
+        .search-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; align-items: center; }
+        .search-bar input { flex: 1; min-width: 150px; }
+        .search-bar select { background: #0a1520; color: #fff; border: 1px solid #2a4a5a; padding: 10px; border-radius: 8px; }
+        .balance-card { background: linear-gradient(135deg, #1a2a3a 0%, #0a1520 100%); border: 1px solid #00d4ff30; border-radius: 12px; padding: 15px; margin: 10px 0; }
+        .balance-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #2a4a5a; }
+        .balance-row:last-child { border-bottom: none; }
+        .balance-row .label { color: #5a8a9a; font-size: 12px; }
+        .balance-row .value { color: #00d4ff; font-weight: 600; font-size: 13px; }
+        .withdrawal-item { background: #0a1520; padding: 12px; border-radius: 8px; margin: 8px 0; border: 1px solid #2a4a5a; }
+        .withdrawal-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .withdrawal-info { font-size: 11px; color: #5a8a9a; }
+        .action-btn { padding: 4px 10px; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; margin: 2px; }
+        .action-btn.approve { background: #4caf50; color: #fff; }
+        .action-btn.reject { background: #ff6b6b; color: #fff; }
+        .action-btn.adjust { background: #0088aa; color: #fff; }
+        .page-title { color: #00d4ff; font-size: 16px; font-weight: 600; margin-bottom: 15px; text-align: center; }
+        .tab-badge { background: #ff6b6b; color: #fff; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px; }
+            @media(max-width: 400px) { .container { padding: 12px; border-radius: 12px; } .brand-logo {width: 70px; height: 70px; background: #000; } .btn { min-height: 48px; } .form-input { font-size: 16px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="lang-switch">
+            <button class="lang-btn active" onclick="setLang('vi')" data-lang="vi">VI</button>
+            <button class="lang-btn" onclick="setLang('zh')" data-lang="zh">CN</button>
+            <button class="lang-btn" onclick="setLang('en')" data-lang="en">EN</button>
+        </div>
+        <div id="loginPage">
+            <div class="login-box">
+                <div style="text-align:center;margin-bottom:20px;">
+                    <div class="brand-logo" style="margin-bottom:10px;">
+                        <img src="logo.png" alt="DX" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                        <div style="display:none;width:60px;height:60px;align-items:center;justify-content:center;font-size:24px;color:#000;font-weight:bold;">DX</div>
+                    </div>
+                    <div class="brand-name" data-i18n="brandName">Blue Light</div>
+                    <div class="brand-sub" data-i18n="adminPortal">Quan tri Admin</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" data-i18n="adminAccount">Tai khoan Admin</label>
+                    <input type="text" class="form-input" id="loginUser" data-i18n-placeholder="enterAccount" placeholder="Nhap tai khoan">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" data-i18n="password">Mat khau</label>
+                    <input type="password" class="form-input" id="loginPass" data-i18n-placeholder="enterPassword" placeholder="Nhap mat khau">
+                </div>
+                <button class="btn btn-primary" onclick="doLogin()" data-i18n="login">Dang nhap</button>
+                <p id="loginError" style="color:#ff6b6b;text-align:center;margin-top:8px;font-size:12px;display:none;"></p>
+            </div>
+        </div>
+
+        <div id="mainPage" style="display:none;">
+            <div class="header-wrap">
+                <button class="logout-btn" onclick="logout()" data-i18n="logout">Thoat</button>
+                <div class="brand-header">
+                    <div class="brand-logo">
+                        <img src="logo.png" alt="DX" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                        <div style="display:none;width:50px;height:50px;align-items:center;justify-content:center;font-size:20px;color:#000;font-weight:bold;">DX</div>
+                    </div>
+                    <div class="brand-name" data-i18n="brandNameAdmin">Blue Light - Admin</div>
+                </div>
+            </div>
+
+            <div class="nav-bar">
+                <button class="nav-btn" onclick="showTab('stats')" data-i18n="navOverview">Tong quan</button>
+                <button class="nav-btn" onclick="showTab('merchants')" data-i18n="navMerchants">Quan ly Merchant</button>
+                <button class="nav-btn" onclick="showTab('chargers')" data-i18n="navChargers">Tat ca tram sac</button>
+                <button class="nav-btn" onclick="showTab('orders')" data-i18n="navOrders">Tat ca don hang</button>
+                <button class="nav-btn" onclick="showTab('withdrawals')" data-i18n="navWithdrawals">Rut tien cho duyet<span class="tab-badge" id="withdrawalBadge" style="display:none;">0</span></button>
+                <button class="nav-btn" onclick="showTab('ledger')" data-i18n="navLedger">Bao cao tai chinh</button>
+            </div>
+
+            <div class="section" id="statsSection">
+                <div class="stat-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="statMerchants">0</div>
+                        <div class="stat-label" data-i18n="merchantCount">So Merchant</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statChargers">0</div>
+                        <div class="stat-label" data-i18n="chargerCount">So tram sac</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statTodayIncome">0</div>
+                        <div class="stat-label" data-i18n="todayIncome">Thu nhap hom nay (VND)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statTodayOrders">0</div>
+                        <div class="stat-label" data-i18n="todayOrders">Don hang hom nay</div>
+                    </div>
+                </div>
+                <div class="stat-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="statTotalIncome">0</div>
+                        <div class="stat-label" data-i18n="totalIncome">Tong thu nhap (VND)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statTotalOrders">0</div>
+                        <div class="stat-label" data-i18n="totalOrders">Tong don hang</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statTotalBalance">0</div>
+                        <div class="stat-label" data-i18n="totalBalance">Tong so du Merchant (VND)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statPendingWithdraw">0</div>
+                        <div class="stat-label" data-i18n="pendingWithdraw">Rut tien cho duyet (VND)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" id="merchantsSection">
+                <p class="page-title" data-i18n="merchantManagement">Quan ly Merchant</p>
+                <div class="search-bar">
+                    <input type="text" class="form-input" id="merchantSearch" data-i18n-placeholder="searchMerchant" placeholder="Tim kiem ten hoac so dien thoai" style="flex:2;">
+                    <select id="merchantStatusFilter" onchange="loadMerchants()">
+                        <option value="" data-i18n="allStatus">Tat ca trang thai</option>
+                        <option value="active" data-i18n="statusActive">Hoat dong</option>
+                        <option value="pending" data-i18n="statusPending">Cho duyet</option>
+                        <option value="disabled" data-i18n="statusDisabled">Da vo hieu</option>
+                    </select>
+                    <button class="btn btn-secondary" style="width:auto;padding:10px 16px;" onclick="loadMerchants()" data-i18n="search">Tim kiem</button>
+                </div>
+                <div id="merchantList"></div>
+            </div>
+
+            <div class="section" id="chargersSection">
+                <p class="page-title" data-i18n="allChargers">Tat ca tram sac</p>
+                <div class="search-bar">
+                    <input type="text" class="form-input" id="chargerSearch" data-i18n-placeholder="searchCharger" placeholder="Tim kiem ten, vi tri, IMEI" style="flex:2;">
+                    <select id="chargerStatusFilter" onchange="loadChargers()">
+                        <option value="" data-i18n="allStatus">Tat ca trang thai</option>
+                        <option value="online" data-i18n="online">Truc tuyen</option>
+                        <option value="offline" data-i18n="offline">Ngoai tuyen</option>
+                    </select>
+                    <button class="btn btn-secondary" style="width:auto;padding:10px 16px;" onclick="loadChargers()" data-i18n="search">Tim kiem</button>
+                </div>
+                <div id="allChargerList"></div>
+            </div>
+
+            <div class="section" id="ordersSection">
+                <p class="page-title" data-i18n="allOrders">Tat ca don hang</p>
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th data-i18n="thOrderNo">Ma don</th>
+                                <th data-i18n="thMerchant">Merchant</th>
+                                <th data-i18n="thCharger">Tram sac</th>
+                                <th data-i18n="thPort">Cong</th>
+                                <th data-i18n="thPhone">So DT</th>
+                                <th data-i18n="thAmount">So tien</th>
+                                <th data-i18n="thStatus">Trang thai</th>
+                                <th data-i18n="thTime">Thoi gian</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section" id="withdrawalsSection">
+                <p class="page-title" data-i18n="pendingWithdrawals">Yeu cau rut tien cho duyet</p>
+                <div id="pendingWithdrawalsList"></div>
+            </div>
+
+            <div class="section" id="ledgerSection">
+                <p class="page-title" data-i18n="financialReport">Bao cao tai chinh</p>
+                <div class="card">
+                    <div class="card-title" data-i18n="excelExport">Xuat Excel</div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+                        <input type="date" id="exportDateFrom" style="background:#0a1520;color:#fff;border:1px solid #2a4a5a;padding:8px;border-radius:6px;">
+                        <input type="date" id="exportDateTo" style="background:#0a1520;color:#fff;border:1px solid #2a4a5a;padding:8px;border-radius:6px;">
+                        <button class="btn-export" onclick="exportOrders()" data-i18n="exportOrders">Xuat don hang</button>
+                        <button class="btn-export" onclick="exportSettlement()" data-i18n="exportSettlement">Xuat doi chieu</button>
+                    </div>
+                    <p style="font-size:11px;color:#5a8a9a;margin-top:8px;" data-i18n="exportNote">Khong chon ngay se xuat tat ca du lieu</p>
+                </div>
+
+                <div class="card" style="margin-top:15px;">
+                    <div class="card-title" data-i18n="settlementSummary">Tong hop doi chieu Merchant</div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th data-i18n="thMerchant">Merchant</th>
+                                    <th data-i18n="thChargerCount">So tram sac</th>
+                                    <th data-i18n="thTotalIncome">Tong thu nhap (VND)</th>
+                                    <th data-i18n="thRate">Ty le chia se</th>
+                                    <th data-i18n="thPlatformIncome">Thu nhap nen tang</th>
+                                    <th data-i18n="thMerchantIncome">Thu nhap Merchant</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ledgerTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="merchantModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:1000;align-items:center;justify-content:center;">
+        <div style="background:#111;border-radius:15px;padding:20px;max-width:500px;width:90%;border:1px solid #1a3a4a;max-height:80vh;overflow-y:auto;">
+            <h3 style="color:#00d4ff;text-align:center;margin-bottom:15px;" data-i18n="merchantDetail">Chi tiet Merchant</h3>
+            <div id="merchantModalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3000'
+            : 'https://charger-control-api.vercel.app';
+
+        let token = localStorage.getItem('admin_token') || '';
+        let statusPollInterval = null;
+
+        const i18n = {
+            vi: {
+                brandName: 'Đèn Xanh Nhỏ',
+                brandNameAdmin: 'Đèn Xanh Nhỏ - Admin',
+                adminPortal: 'Quản trị Admin', login: 'Đăng nhập', logout: 'Thoát',
+                adminAccount: 'Tài khoản Admin', password: 'Mật khẩu',
+                enterAccount: 'Nhập tài khoản', enterPassword: 'Nhập mật khẩu',
+                navOverview: 'Tổng quan', navMerchants: 'Quản lý Merchant', navChargers: 'Tất cả trạm sạc',
+                navOrders: 'Tất cả đơn hàng', navWithdrawals: 'Rút tiền chờ duyệt', navLedger: 'Báo cáo tài chính',
+                merchantCount: 'Số Merchant', chargerCount: 'Số trạm sạc',
+                todayIncome: 'Thu nhập hôm nay (VND)', todayOrders: 'Đơn hàng hôm nay',
+                totalIncome: 'Tổng thu nhập (VND)', totalOrders: 'Tổng đơn hàng',
+                totalBalance: 'Tổng số dư Merchant (VND)', pendingWithdraw: 'Rút tiền chờ duyệt (VND)',
+                merchantManagement: 'Quản lý Merchant', searchMerchant: 'Tìm kiếm tên hoặc số điện thoại',
+                allStatus: 'Tất cả trạng thái', statusActive: 'Hoạt động', statusPending: 'Chờ duyệt', statusDisabled: 'Đã vô hiệu',
+                search: 'Tìm kiếm', allChargers: 'Tất cả trạm sạc',
+                searchCharger: 'Tìm kiếm tên, vị trí, IMEI', online: 'Trực tuyến', offline: 'Ngoại tuyến',
+                allOrders: 'Tất cả đơn hàng',
+                thOrderNo: 'Mã đơn', thMerchant: 'Merchant', thCharger: 'Trạm sạc', thPort: 'Cổng',
+                thPhone: 'Số ĐT', thAmount: 'Số tiền', thStatus: 'Trạng thái', thTime: 'Thời gian',
+                pendingWithdrawals: 'Yêu cầu rút tiền chờ duyệt', noPendingWithdrawals: 'Không có yêu cầu rút tiền chờ duyệt',
+                financialReport: 'Báo cáo tài chính', excelExport: 'Xuất Excel',
+                exportOrders: 'Xuất đơn hàng', exportSettlement: 'Xuất đối chiếu',
+                exportNote: 'Không chọn ngày sẽ xuất tất cả dữ liệu',
+                settlementSummary: 'Tổng hợp đối chiếu Merchant',
+                thChargerCount: 'Số trạm sạc', thTotalIncome: 'Tổng thu nhập (VND)',
+                thRate: 'Tỷ lệ chia sẻ', thPlatformIncome: 'Thu nhập nền tảng', thMerchantIncome: 'Thu nhập Merchant',
+                totalLabel: 'Tổng cộng',
+                merchantDetail: 'Chi tiết Merchant',
+                confirmApprove: 'Xác nhận phê duyệt merchant này? Sau khi phê duyệt merchant có thể đăng nhập bình thường',
+                confirmDisable: 'Xác nhận vô hiệu hóa merchant này?',
+                adjustAmount: 'Nhập số tiền điều chỉnh (số dương tăng, số âm giảm):',
+                adjustReason: 'Lý do điều chỉnh (tùy chọn):',
+                noMerchants: 'Không có merchant',
+                noChargers: 'Không có trạm sạc', noOrders: 'Không có đơn hàng',
+                loading: 'Đang tải...', loadFailed: 'Tải thất bại',
+                clickLoadPorts: 'Nhấn để tải trạng thái cổng...',
+                viewControlPorts: 'Xem/Điều khiển cổng',
+                confirmFreeTime: 'Xác nhận phát {duration} phút miễn phí cho cổng {port}?',
+                confirmStop: 'Xác nhận dừng sạc cổng {port}?',
+                sending: 'Đang gửi...', sendFailed: 'Gửi thất bại',
+                portIdle: 'Trống', portCharging: 'Đang sạc', portOccupied: 'Đã chiếm',
+                statusMap: { waiting: 'Chờ', charging: 'Đang sạc', completed: 'Hoàn thành', failed: 'Thất bại' },
+                merchantStatus: { active: 'Hoạt động', pending: 'Chờ duyệt', disabled: 'Đã vô hiệu' },
+                approve: 'Phê duyệt', disable: 'Vô hiệu', adjustBalance: 'Điều chỉnh số dư',
+                viewChargers: 'Xem trạm sạc', balanceLabel: 'Số dư tài khoản',
+                totalIncomeLabel: 'Tổng thu nhập', rateLabel: 'Tỷ lệ chia sẻ',
+                idleCount: 'Trống', busyCount: 'Đang sạc',
+                networkError: 'Lỗi mạng', operationFailed: 'Thao tác thất bại',
+                approved: 'Đã phê duyệt', rejected: 'Đã từ chối',
+                enterRejectReason: 'Nhập lý do từ chối:'
+            },
+            en: {
+                brandName: 'Blue Light',
+                brandNameAdmin: 'Blue Light - Admin',
+                adminPortal: 'Admin Portal', login: 'Login', logout: 'Logout',
+                adminAccount: 'Admin Account', password: 'Password',
+                enterAccount: 'Enter account', enterPassword: 'Enter password',
+                navOverview: 'Overview', navMerchants: 'Merchant Management', navChargers: 'All Chargers',
+                navOrders: 'All Orders', navWithdrawals: 'Pending Withdrawals', navLedger: 'Financial Report',
+                merchantCount: 'Merchant Count', chargerCount: 'Charger Count',
+                todayIncome: "Today's Income (VND)", todayOrders: "Today's Orders",
+                totalIncome: 'Total Income (VND)', totalOrders: 'Total Orders',
+                totalBalance: 'Total Merchant Balance (VND)', pendingWithdraw: 'Pending Withdrawals (VND)',
+                merchantManagement: 'Merchant Management', searchMerchant: 'Search name or phone',
+                allStatus: 'All Status', statusActive: 'Active', statusPending: 'Pending', statusDisabled: 'Disabled',
+                search: 'Search', allChargers: 'All Chargers',
+                searchCharger: 'Search name, location, IMEI', online: 'Online', offline: 'Offline',
+                allOrders: 'All Orders',
+                thOrderNo: 'Order No.', thMerchant: 'Merchant', thCharger: 'Charger', thPort: 'Port',
+                thPhone: 'Phone', thAmount: 'Amount', thStatus: 'Status', thTime: 'Time',
+                pendingWithdrawals: 'Pending Withdrawal Requests', noPendingWithdrawals: 'No pending withdrawal requests',
+                financialReport: 'Financial Report', excelExport: 'Excel Export',
+                exportOrders: 'Export Orders', exportSettlement: 'Export Settlement',
+                exportNote: 'Leave dates empty to export all data',
+                settlementSummary: 'Merchant Settlement Summary',
+                thChargerCount: 'Charger Count', thTotalIncome: 'Total Income (VND)',
+                thRate: 'Commission Rate', thPlatformIncome: 'Platform Income', thMerchantIncome: 'Merchant Income',
+                totalLabel: 'Total',
+                merchantDetail: 'Merchant Detail',
+                confirmApprove: 'Approve this merchant? After approval the merchant can log in normally.',
+                confirmDisable: 'Disable this merchant?',
+                adjustAmount: 'Enter adjustment amount (positive to add, negative to deduct):',
+                adjustReason: 'Reason (optional):',
+                noMerchants: 'No merchants', noChargers: 'No chargers', noOrders: 'No orders',
+                loading: 'Loading...', loadFailed: 'Load failed',
+                clickLoadPorts: 'Click to load port status...',
+                viewControlPorts: 'View/Control Ports',
+                confirmFreeTime: 'Confirm send {duration} minutes free charging to port {port}?',
+                confirmStop: 'Confirm stop charging port {port}?',
+                sending: 'Sending...', sendFailed: 'Send failed',
+                portIdle: 'Idle', portCharging: 'Charging', portOccupied: 'Occupied',
+                statusMap: { waiting: 'Waiting', charging: 'Charging', completed: 'Completed', failed: 'Failed' },
+                merchantStatus: { active: 'Active', pending: 'Pending', disabled: 'Disabled' },
+                approve: 'Approve', disable: 'Disable', adjustBalance: 'Adjust Balance',
+                viewChargers: 'View Chargers', balanceLabel: 'Account Balance',
+                totalIncomeLabel: 'Total Income', rateLabel: 'Commission Rate',
+                idleCount: 'Idle', busyCount: 'Charging',
+                networkError: 'Network error', operationFailed: 'Operation failed',
+                approved: 'Approved', rejected: 'Rejected',
+                enterRejectReason: 'Enter rejection reason:'
+            },
+            zh: {
+                brandName: '小蓝灯',
+                brandNameAdmin: '小蓝灯 - 管理后台',
+                adminPortal: '管理后台', login: '登录', logout: '退出',
+                adminAccount: '管理员账号', password: '密码',
+                enterAccount: '请输入账号', enterPassword: '请输入密码',
+                navOverview: '总览', navMerchants: '商户管理', navChargers: '全部充电桩',
+                navOrders: '全部订单', navWithdrawals: '待审批提现', navLedger: '财务报表',
+                merchantCount: '商户数量', chargerCount: '充电桩数量',
+                todayIncome: '今日收入 (VND)', todayOrders: '今日订单',
+                totalIncome: '总收入 (VND)', totalOrders: '总订单',
+                totalBalance: '商户总余额 (VND)', pendingWithdraw: '待审批提现 (VND)',
+                merchantManagement: '商户管理', searchMerchant: '搜索名称或手机号',
+                allStatus: '全部状态', statusActive: '活跃', statusPending: '待审批', statusDisabled: '已禁用',
+                search: '搜索', allChargers: '全部充电桩',
+                searchCharger: '搜索名称、位置、IMEI', online: '在线', offline: '离线',
+                allOrders: '全部订单',
+                thOrderNo: '订单号', thMerchant: '商户', thCharger: '充电桩', thPort: '端口',
+                thPhone: '手机号', thAmount: '金额', thStatus: '状态', thTime: '时间',
+                pendingWithdrawals: '待审批提现申请', noPendingWithdrawals: '没有待审批提现申请',
+                financialReport: '财务报表', excelExport: '导出Excel',
+                exportOrders: '导出订单', exportSettlement: '导出对账',
+                exportNote: '不选日期将导出全部数据',
+                settlementSummary: '商户对账汇总',
+                thChargerCount: '充电桩数量', thTotalIncome: '总收入 (VND)',
+                thRate: '分成比例', thPlatformIncome: '平台收入', thMerchantIncome: '商户收入',
+                totalLabel: '合计',
+                merchantDetail: '商户详情',
+                confirmApprove: '确认审批该商户？审批后商户可正常登录',
+                confirmDisable: '确认禁用该商户？',
+                adjustAmount: '请输入调整金额（正数为增加，负数为扣减）：',
+                adjustReason: '调整原因（可选）：',
+                noMerchants: '没有商户', noChargers: '没有充电桩', noOrders: '没有订单',
+                loading: '加载中...', loadFailed: '加载失败',
+                clickLoadPorts: '点击加载端口状态...',
+                viewControlPorts: '查看/控制端口',
+                confirmFreeTime: '确认为端口{port}发放{duration}分钟免费充电？',
+                confirmStop: '确认停止端口{port}充电？',
+                sending: '发送中...', sendFailed: '发送失败',
+                portIdle: '空闲', portCharging: '充电中', portOccupied: '已占用',
+                statusMap: { waiting: '等待', charging: '充电中', completed: '已完成', failed: '失败' },
+                merchantStatus: { active: '活跃', pending: '待审批', disabled: '已禁用' },
+                approve: '审批', disable: '禁用', adjustBalance: '调整余额',
+                viewChargers: '查看充电桩', balanceLabel: '账户余额',
+                totalIncomeLabel: '总收入', rateLabel: '分成比例',
+                idleCount: '空闲', busyCount: '充电中',
+                networkError: '网络错误', operationFailed: '操作失败',
+                approved: '已批准', rejected: '已拒绝',
+                enterRejectReason: '请输入拒绝原因：'
+            }
+        };
+
+        let currentLang = localStorage.getItem('lang') || 'vi';
+
+        function t(key, vars) {
+            let text = i18n[currentLang]?.[key] || i18n['en'][key] || key;
+            if (vars) {
+                Object.keys(vars).forEach(k => {
+                    text = text.replace(new RegExp('{' + k + '}', 'g'), vars[k]);
+                });
+            }
+            return text;
+        }
+
+        function setLang(lang) {
+            currentLang = lang;
+            localStorage.setItem('lang', lang);
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+            applyTranslations();
+            if (token) { loadMerchants(); loadChargers(); loadOrders(); loadPendingWithdrawals(); }
+        }
+
+        function applyTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                el.textContent = t(el.dataset.i18n);
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                el.placeholder = t(el.dataset.i18nPlaceholder);
+            });
+        }
+
+        window.onload = function() {
+            setLang(currentLang);
+            if (token) showMainPage();
+            const today = new Date().toISOString().split('T')[0];
+            const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+            document.getElementById('exportDateFrom').value = monthAgo;
+            document.getElementById('exportDateTo').value = today;
+        };
+
+        function authHeaders() { return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }; }
+
+        async function doLogin() {
+            const username = document.getElementById('loginUser').value.trim();
+            const password = document.getElementById('loginPass').value.trim();
+            if (!username || !password) { showErr('loginError', t('enterAccount') + ' / ' + t('enterPassword')); return; }
+            try {
+                const resp = await fetch(`${API_BASE}/api/auth/admin/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
+                const data = await resp.json();
+                if (data.code === 200) { token = data.data.token; localStorage.setItem('admin_token', token); showMainPage(); }
+                else { showErr('loginError', data.msg); }
+            } catch (e) { showErr('loginError', t('networkError')); }
+        }
+
+        function showErr(id, msg) { const e = document.getElementById(id); e.textContent = msg; e.style.display = 'block'; }
+
+        function logout() {
+            token = ''; localStorage.removeItem('admin_token');
+            document.getElementById('loginPage').style.display = 'block';
+            document.getElementById('mainPage').style.display = 'none';
+        }
+
+        function showMainPage() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('mainPage').style.display = 'block';
+            loadStats(); loadMerchants(); loadChargers(); loadOrders(); loadPendingWithdrawals();
+            if (statusPollInterval) clearInterval(statusPollInterval);
+            statusPollInterval = setInterval(() => { if (token) loadChargers(); }, 30000);
+        }
+
+        function showTab(tab) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tab + 'Section').classList.add('active');
+            event.target.classList.add('active');
+            if (tab === 'ledger') loadLedger();
+        }
+
+        async function loadStats() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/admin/stats`, { headers: authHeaders() });
+                const data = await resp.json();
+                if (data.code === 200) {
+                    const d = data.data;
+                    document.getElementById('statMerchants').textContent = d.merchant_count;
+                    document.getElementById('statChargers').textContent = d.charger_count;
+                    document.getElementById('statTodayIncome').textContent = (d.today.total_income || 0).toLocaleString();
+                    document.getElementById('statTodayOrders').textContent = d.today.order_count || 0;
+                    document.getElementById('statTotalIncome').textContent = (d.total.total_income || 0).toLocaleString();
+                    document.getElementById('statTotalOrders').textContent = d.total.order_count || 0;
+                    document.getElementById('statTotalBalance').textContent = (d.total_balance || 0).toLocaleString();
+                    document.getElementById('statPendingWithdraw').textContent = (d.pending_withdrawals || 0).toLocaleString();
+                    document.getElementById('withdrawalBadge').textContent = d.pending_merchant_count || 0;
+                    document.getElementById('withdrawalBadge').style.display = d.pending_merchant_count > 0 ? 'inline' : 'none';
+                }
+            } catch (e) {}
+        }
+
+        async function loadMerchants() {
+            const search = document.getElementById('merchantSearch').value;
+            const status = document.getElementById('merchantStatusFilter').value;
+            let url = `${API_BASE}/api/admin/merchants?`;
+            if (search) url += `search=${encodeURIComponent(search)}&`;
+            if (status) url += `status=${status}&`;
+
+            try {
+                const resp = await fetch(url, { headers: authHeaders() });
+                const data = await resp.json();
+                const list = document.getElementById('merchantList');
+                if (data.code !== 200 || data.data.length === 0) { list.innerHTML = '<div class="empty-tip">' + t('noMerchants') + '</div>'; return; }
+
+                const ms = t('merchantStatus');
+                list.innerHTML = data.data.map(m => {
+                    const statusClass = { active: 'badge-active', pending: 'badge-pending', disabled: 'badge-disabled' };
+                    const mcId = `mc-${m.id}`;
+                    return `<div class="card">
+                        <div class="charger-header">
+                            <div><div class="charger-name">${m.name}</div><div class="charger-info">${t('thPhone')}: ${m.phone || '-'} | ${t('chargerCount')}: ${m.charger_count}</div></div>
+                            <span class="badge ${statusClass[m.status] || ''}">${ms[m.status] || m.status}</span>
+                        </div>
+                        <div class="balance-row"><span class="label">${t('balanceLabel')}</span><span class="value">${(m.balance || 0).toLocaleString()} VND</span></div>
+                        <div class="balance-row"><span class="label">${t('totalIncomeLabel')}</span><span class="value">${(m.total_income || 0).toLocaleString()} VND</span></div>
+                        <div class="balance-row"><span class="label">${t('rateLabel')}</span><span class="value">${(m.commission_rate * 100).toFixed(0)}%</span></div>
+                        <div style="display:flex;gap:5px;margin-top:10px;flex-wrap:wrap;">
+                            ${m.status !== 'active' ? `<button class="action-btn approve" onclick="approveMerchant(${m.id})">${t('approve')}</button>` : `<button class="action-btn reject" onclick="disableMerchant(${m.id})">${t('disable')}</button>`}
+                            <button class="action-btn adjust" onclick="showAddBalance(${m.id}, '${m.name}')">${t('adjustBalance')}</button>
+                        </div>
+                        <button class="detail-btn" onclick="toggleMerchantChargers(${m.id}, '${mcId}')">${t('viewChargers')}</button>
+                        <div id="${mcId}" style="display:none;margin-top:10px;"></div>
+                    </div>`;
+                }).join('');
+            } catch (e) {}
+        }
+
+        async function approveMerchant(id) {
+            if (!confirm(t('confirmApprove'))) return;
+            try {
+                await fetch(`${API_BASE}/api/admin/merchants/${id}/approve`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ status: 'active' }) });
+                loadMerchants(); loadStats();
+            } catch (e) { alert(t('operationFailed')); }
+        }
+
+        async function disableMerchant(id) {
+            if (!confirm(t('confirmDisable'))) return;
+            try {
+                await fetch(`${API_BASE}/api/admin/merchants/${id}/approve`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ status: 'disabled' }) });
+                loadMerchants(); loadStats();
+            } catch (e) { alert(t('operationFailed')); }
+        }
+
+        async function toggleMerchantChargers(merchantId, containerId) {
+            const el = document.getElementById(containerId);
+            if (el.dataset.loaded) {
+                el.style.display = el.style.display === 'none' ? 'block' : 'none';
+                return;
+            }
+            el.style.display = 'block';
+            el.dataset.loaded = 'true';
+            el.innerHTML = '<div style="color:#5a8a9a;font-size:11px;padding:10px;">' + t('loading') + '</div>';
+
+            try {
+                const resp = await fetch(`${API_BASE}/api/admin/chargers?merchant_id=${merchantId}`, { headers: authHeaders() });
+                const data = await resp.json();
+                if (data.code !== 200 || data.data.length === 0) {
+                    el.innerHTML = '<div style="color:#5a8a9a;font-size:11px;padding:10px;">' + t('noChargers') + '</div>';
+                    return;
+                }
+                el.innerHTML = data.data.map(c => {
+                    const typeText = c.port_count <= 2 ? '2 ' + t('portIdle') : '10 ' + t('portIdle');
+                    const expandedId = `mc-port-${c.id}`;
+                    return `<div style="background:#0a1520;border:1px solid #2a4a5a;border-radius:8px;padding:10px;margin:8px 0;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                            <div><span style="color:#00d4ff;font-weight:600;font-size:13px;">${c.name}</span><span style="font-size:11px;color:#5a8a9a;margin-left:8px;">${typeText} | IMEI:${c.imei} | ${c.status==='online'?t('online'):t('offline')}</span></div>
+                        </div>
+                        <div style="font-size:11px;color:#5a8a9a;margin-bottom:6px;">${t('idleCount')}: ${c.idle_ports || 0} | ${t('busyCount')}: ${c.busy_ports || 0}</div>
+                        <div class="port-grid" id="${expandedId}" style="display:none;"></div>
+                        <button class="detail-btn" onclick="togglePorts(${c.id}, '${expandedId}')" style="margin-top:6px;">${t('viewControlPorts')}</button>
+                    </div>`;
+                }).join('');
+            } catch (e) {
+                el.innerHTML = '<div style="color:#ff6b6b;font-size:11px;padding:10px;">' + t('loadFailed') + '</div>';
+            }
+        }
+
+        function showAddBalance(id, name) {
+            const amount = prompt(`${name} - ${t('adjustAmount')}`);
+            if (amount === null) return;
+            const reason = prompt(t('adjustReason')) || '';
+            fetch(`${API_BASE}/api/admin/merchants/${id}/adjust-balance`, {
+                method: 'POST', headers: authHeaders(),
+                body: JSON.stringify({ amount: parseInt(amount), reason })
+            }).then(r => r.json()).then(d => {
+                alert(d.msg);
+                loadMerchants();
+            }).catch(() => alert(t('operationFailed')));
+        }
+
+        async function loadChargerPorts(chargerId, containerId) {
+            try {
+                const resp = await fetch(`${API_BASE}/api/admin/chargers/${chargerId}`, { headers: authHeaders() });
+                const data = await resp.json();
+                if (data.code !== 200) return;
+                const ports = data.data.ports || [];
+                const container = document.getElementById(containerId);
+                container.innerHTML = ports.map((p, idx) => {
+                    const statusClass = p.status === 'charging' ? 'port-charging' : (p.status === 'occupied' ? 'port-occupied' : 'port-idle');
+                    const statusText = p.status === 'charging' ? t('portCharging') : (p.status === 'occupied' ? t('portOccupied') : t('portIdle'));
+                    const isCharging = p.status === 'charging';
+                    const controls = `
+                        <button class="mini-btn" onclick="freeTime(${chargerId}, ${p.port_number}, 180, this)" ${isCharging ? 'disabled' : ''}>3h</button>
+                        <button class="mini-btn" onclick="freeTime(${chargerId}, ${p.port_number}, 360, this)" ${isCharging ? 'disabled' : ''}>6h</button>
+                        <button class="mini-btn" onclick="freeTime(${chargerId}, ${p.port_number}, 540, this)" ${isCharging ? 'disabled' : ''}>9h</button>
+                        <button class="mini-btn stop" onclick="stopCharge(${chargerId}, ${p.port_number}, this)" ${!isCharging ? 'disabled' : ''}>${t('disable')}</button>`;
+                    return `<div class="port-item ${statusClass}">
+                        <span class="port-num">${p.port_number}</span>
+                        <span class="port-status">${statusText}</span>
+                        <div class="port-controls">${controls}</div>
+                    </div>`;
+                }).join('');
+            } catch (e) { console.error('load ports failed', e); }
+        }
+
+        async function loadChargers() {
+            const search = document.getElementById('chargerSearch').value;
+            const status = document.getElementById('chargerStatusFilter').value;
+
+            try {
+                let resp, data;
+                if (!search && !status) {
+                    resp = await fetch(`${API_BASE}/api/admin/chargers-realtime-status`, { headers: authHeaders() });
+                    data = await resp.json();
+                } else {
+                    let url = `${API_BASE}/api/admin/chargers?`;
+                    if (search) url += `search=${encodeURIComponent(search)}&`;
+                    if (status) url += `status=${status}&`;
+                    resp = await fetch(url, { headers: authHeaders() });
+                    data = await resp.json();
+                }
+                const list = document.getElementById('allChargerList');
+                if (data.code !== 200 || data.data.length === 0) { list.innerHTML = '<div class="empty-tip">' + t('noChargers') + '</div>'; return; }
+
+                list.innerHTML = data.data.map(c => {
+                    const typeText = c.port_count <= 2 ? '2' : '10';
+                    const expandedId = `ports-${c.id}`;
+                    const statusText = c.platform_online === true ? t('online') : (c.platform_online === false ? t('offline') : (c.status === 'online' ? t('online') : t('offline')));
+                    const statusColor = c.platform_online === true ? '#4caf50' : (c.platform_online === false ? '#ff6b6b' : (c.status === 'online' ? '#4caf50' : '#ff6b6b'));
+                    return `<div class="card">
+                        <div class="charger-header">
+                            <div><div class="charger-name">${c.name}</div><div class="charger-info">${typeText} ${t('portIdle')} | IMEI: ${c.imei} | ${t('thMerchant')}: ${c.merchant_name || '-'} | ${t('locationLabel') || 'Location'}: ${c.location || '-'}</div></div>
+                            <span class="badge badge-active" style="color:${statusColor};">${statusText}</span>
+                        </div>
+                        <div style="font-size:11px;color:#5a8a9a;margin-bottom:8px;">${t('idleCount')}: ${c.idle_ports || 0} | ${t('busyCount')}: ${c.busy_ports || 0}</div>
+                        <div class="port-grid" id="${expandedId}">
+                            <div style="color:#5a8a9a;font-size:11px;">${t('clickLoadPorts')}</div>
+                        </div>
+                        <button class="detail-btn" onclick="togglePorts(${c.id}, '${expandedId}')">${t('viewControlPorts')}</button>
+                    </div>`;
+                }).join('');
+            } catch (e) {}
+        }
+
+        function togglePorts(chargerId, containerId) {
+            const el = document.getElementById(containerId);
+            if (el.dataset.loaded) {
+                el.style.display = el.style.display === 'none' ? 'grid' : 'none';
+            } else {
+                el.style.display = 'grid';
+                el.dataset.loaded = 'true';
+                loadChargerPorts(chargerId, containerId);
+            }
+        }
+
+        function freeTime(chargerId, portNum, minutes, btn) {
+            if (!confirm(t('confirmFreeTime', { port: portNum, duration: minutes }))) return;
+            btn.disabled = true; btn.textContent = t('sending');
+            fetch(`${API_BASE}/api/admin/control/port`, {
+                method: 'POST', headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+                body: JSON.stringify({ charger_id: chargerId, port_number: portNum, action: 'start', duration: minutes })
+            }).then(r => r.json()).then(d => {
+                if (d.code === 200) {
+                    alert(`${t('portIdle')} ${portNum} ${t('sending')} ${minutes} ${t('minutes')}`);
+                } else {
+                    alert(d.msg || t('sendFailed'));
+                }
+                const expandedId = `ports-${chargerId}`;
+                if (document.getElementById(expandedId)) loadChargerPorts(chargerId, expandedId);
+                btn.disabled = false; btn.textContent = minutes >= 60 ? `${minutes/60}h` : `${minutes}m`;
+            }).catch(() => { btn.disabled = false; btn.textContent = t('sendFailed'); alert(t('networkError')); });
+        }
+
+        function stopCharge(chargerId, portNum, btn) {
+            if (!confirm(t('confirmStop', { port: portNum }))) return;
+            btn.disabled = true; btn.textContent = t('sending');
+            fetch(`${API_BASE}/api/admin/control/port`, {
+                method: 'POST', headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+                body: JSON.stringify({ charger_id: chargerId, port_number: portNum, action: 'stop' })
+            }).then(r => r.json()).then(d => {
+                if (d.code === 200) {
+                    alert(`${t('portIdle')} ${portNum} ${t('disable')}`);
+                } else {
+                    alert(d.msg || t('sendFailed'));
+                }
+                const expandedId = `ports-${chargerId}`;
+                if (document.getElementById(expandedId)) loadChargerPorts(chargerId, expandedId);
+                btn.disabled = false; btn.textContent = t('disable');
+            }).catch(() => { btn.disabled = false; btn.textContent = t('disable'); alert(t('networkError')); });
+        }
+
+        async function loadOrders() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/order/all?limit=100`, { headers: authHeaders() });
+                const data = await resp.json();
+                const tbody = document.getElementById('orderTableBody');
+                const sm = t('statusMap');
+                if (!data.data.orders || data.data.orders.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#5a8a9a;padding:20px;">' + t('noOrders') + '</td></tr>'; return; }
+                tbody.innerHTML = data.data.orders.map(o => `<tr><td style="font-size:10px;">${o.order_no}</td><td>${o.merchant_name || '-'}</td><td>${o.charger_name || '-'}</td><td>${o.port_number}</td><td>${o.user_phone}</td><td>${(o.amount || 0).toLocaleString()}</td><td>${sm[o.charge_status] || o.charge_status}</td><td style="font-size:10px;">${o.created_at ? o.created_at.slice(0, 16) : '-'}</td></tr>`).join('');
+            } catch (e) {}
+        }
+
+        async function loadPendingWithdrawals() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/admin/withdrawals/pending`, { headers: authHeaders() });
+                const data = await resp.json();
+                const list = document.getElementById('pendingWithdrawalsList');
+                if (data.data.length === 0) { list.innerHTML = '<div class="empty-tip">' + t('noPendingWithdrawals') + '</div>'; return; }
+                list.innerHTML = data.data.map(w => `<div class="withdrawal-item">
+                    <div class="withdrawal-header">
+                        <span style="color:#00d4ff;font-weight:600;">${(w.amount || 0).toLocaleString()} VND</span>
+                        <span class="badge badge-pending">${t('statusPending')}</span>
+                    </div>
+                    <div class="withdrawal-info">
+                        ${t('thMerchant')}: ${w.merchant_name} (${w.merchant_phone})<br>
+                        ${t('bankName')}: ${w.bank_name} | ${t('bankAccount')}: ${w.bank_account}<br>
+                        ${t('accountHolder')}: ${w.account_holder}<br>
+                        ${t('thTime')}: ${w.created_at ? w.created_at.slice(0, 16) : '-'}
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:10px;">
+                        <button class="action-btn approve" onclick="processWithdraw(${w.id}, 'approved')">${t('approve')}</button>
+                        <button class="action-btn reject" onclick="processWithdraw(${w.id}, 'rejected')">${t('disable')}</button>
+                    </div>
+                </div>`).join('');
+            } catch (e) {}
+        }
+
+        async function processWithdraw(id, status) {
+            const note = status === 'rejected' ? prompt(t('enterRejectReason')) || '' : '';
+            try {
+                const resp = await fetch(`${API_BASE}/api/admin/withdrawals/${id}/process`, {
+                    method: 'PUT', headers: authHeaders(),
+                    body: JSON.stringify({ status, admin_note: note })
+                });
+                const data = await resp.json();
+                alert(data.msg);
+                loadPendingWithdrawals(); loadStats();
+            } catch (e) { alert(t('operationFailed')); }
+        }
+
+        async function loadLedger() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/admin/merchants`, { headers: authHeaders() });
+                const data = await resp.json();
+                const tbody = document.getElementById('ledgerTableBody');
+                let totalIncome = 0, totalPlatform = 0, totalMerchant = 0;
+
+                const rows = data.data.map(m => {
+                    const income = m.total_income || 0;
+                    const platformShare = Math.round(income * m.commission_rate);
+                    const merchantShare = income - platformShare;
+                    totalIncome += income; totalPlatform += platformShare; totalMerchant += merchantShare;
+                    return `<tr><td>${m.name}</td><td>${m.charger_count}</td><td>${income.toLocaleString()}</td><td>${(m.commission_rate * 100).toFixed(0)}%</td><td>${platformShare.toLocaleString()}</td><td>${merchantShare.toLocaleString()}</td></tr>`;
+                });
+
+                rows.push(`<tr style="background:#0a2a1a;font-weight:600;"><td>${t('totalLabel')}</td><td>-</td><td>${totalIncome.toLocaleString()}</td><td>-</td><td>${totalPlatform.toLocaleString()}</td><td>${totalMerchant.toLocaleString()}</td></tr>`);
+                tbody.innerHTML = rows.join('');
+            } catch (e) {}
+        }
+
+        function exportOrders() {
+            const from = document.getElementById('exportDateFrom').value;
+            const to = document.getElementById('exportDateTo').value;
+            let url = `${API_BASE}/api/admin/export/orders?token=${token}`;
+            if (from) url += `&date_from=${from}`;
+            if (to) url += `&date_to=${to}`;
+            window.open(url, '_blank');
+        }
+
+        function exportSettlement() {
+            const from = document.getElementById('exportDateFrom').value;
+            const to = document.getElementById('exportDateTo').value;
+            let url = `${API_BASE}/api/admin/export/settlement?token=${token}`;
+            if (from) url += `&date_from=${from}`;
+            if (to) url += `&date_to=${to}`;
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>

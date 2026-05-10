@@ -1,0 +1,14 @@
+{
+  "name": "charger-control",
+  "version": "1.0.0",
+  "description": "充电桩桌面控制中心",
+  "main": "server.js",
+  "dependencies": {
+    "axios": "^1.16.0",
+    "express": "^4.19.2",
+    "puppeteer": "^24.43.0"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}

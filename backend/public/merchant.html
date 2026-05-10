@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue Light - Merchant</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+        body { background: #0a0a0a; min-height: 100vh; padding: 15px; }
+        .container { max-width: 800px; margin: 0 auto; background: #111; border-radius: 20px; padding: 20px; border: 1px solid #1a3a4a; position: relative; }
+        .lang-switch { position: absolute; top: 15px; left: 15px; display: flex; gap: 6px; z-index: 10; }
+        .lang-btn { padding: 4px 10px; border: 1px solid #2a4a5a; background: #1a2a3a; color: #5a8a9a; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .lang-btn.active { background: #00d4ff; color: #000; border-color: #00d4ff; }
+        .brand-header { text-align: center; margin-bottom: 20px; }
+        .brand-logo {width: 80px; height: 80px; margin: 0 auto 8px; background: #000; }
+        .brand-logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 0; background: none; }
+        .brand-name { font-size: 22px; font-weight: 700; color: #00d4ff; text-shadow: 0 0 15px #00d4ff50; }
+        .brand-sub { font-size: 13px; color: #5a8a9a; margin-top: 4px; }
+        .nav-bar { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
+        .nav-btn { padding: 8px 14px; border: 1px solid #2a4a5a; background: #1a2a3a; color: #5a8a9a; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .nav-btn.active { background: #00d4ff; color: #000; border-color: #00d4ff; }
+        .section { display: none; }
+        .section.active { display: block; }
+        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
+        @media(min-width: 600px) { .stat-grid { grid-template-columns: repeat(4, 1fr); } }
+        .stat-item { background: #1a2a3a; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #2a4a5a; }
+        .stat-value { font-size: 20px; font-weight: 700; color: #00d4ff; }
+        .stat-label { font-size: 11px; color: #5a8a9a; margin-top: 4px; }
+        .card { background: #1a2a3a; border-radius: 12px; padding: 15px; margin: 10px 0; border: 1px solid #2a4a5a; }
+        .card-title { color: #00d4ff; margin-bottom: 12px; font-size: 14px; font-weight: 600; }
+        .ports-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 10px; }
+        .port-status-item { padding: 8px; border-radius: 6px; text-align: center; font-size: 11px; background: #1a2a3a; border: 1px solid #2a4a5a; }
+        .port-status-item.idle { border-color: #4caf50; background: #0a2010; }
+        .port-status-item.charging { border-color: #ffa500; background: #2a2010; }
+        .port-num { font-size: 14px; font-weight: 700; color: #00d4ff; }
+        .port-label { font-size: 9px; color: #5a8a9a; margin-top: 2px; }
+        .port-status-item.idle .port-label { color: #4caf50; }
+        .port-status-item.charging .port-label { color: #ffa500; }
+        .control-btn { padding: 3px 8px; border: none; border-radius: 4px; font-size: 10px; font-weight: 600; cursor: pointer; margin-top: 3px; }
+        .control-btn.start { background: #4caf50; color: #fff; }
+        .control-btn.stop { background: #ff6b6b; color: #fff; }
+        .control-btn:disabled { opacity: 0.4; }
+        .port-controls { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; }
+        .port-controls input { width: 100%; padding: 3px 4px; border: 1px solid #2a4a5a; border-radius: 4px; font-size: 10px; background: #0a1520; color: #fff; text-align: center; }
+        .port-controls-row { display: flex; gap: 3px; }
+        .port-controls-row .control-btn { flex: 1; margin-top: 0; }
+        .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+        .filter-bar select, .filter-bar input { background: #0a1520; color: #fff; border: 1px solid #2a4a5a; padding: 8px; border-radius: 8px; font-size: 12px; }
+        .filter-bar .btn { width: auto; padding: 8px 14px; margin: 0; font-size: 12px; }
+        .platform-online { color: #4caf50; }
+        .platform-offline { color: #ff6b6b; }
+        .badge { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; }
+        .badge-active { background: #1a3a4a; color: #4caf50; }
+        .form-group { margin: 12px 0; }
+        .form-label { font-size: 12px; color: #00d4ff; font-weight: 600; display: block; margin-bottom: 6px; }
+        .form-input { width: 100%; padding: 10px; border: 1px solid #2a4a5a; border-radius: 8px; font-size: 14px; background: #0a1520; color: #fff; outline: none; }
+        .form-input:focus { border-color: #00d4ff; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; margin: 8px 0; }
+        .btn-primary { background: linear-gradient(135deg, #00d4ff 0%, #0088aa 100%); color: #000; }
+        .btn-secondary { background: #2a3a4a; color: #5a8a9a; border: 1px solid #2a4a5a; }
+        .code-input-group { display: flex; gap: 10px; }
+        .code-input-group input { flex: 1; }
+        .code-btn { padding: 10px 15px; background: #1a3a4a; color: #00d4ff; border: 1px solid #2a4a5a; border-radius: 8px; font-size: 12px; white-space: nowrap; }
+        .code-btn:disabled { opacity: 0.5; }
+        .table-scroll { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #2a4a5a; }
+        th { background: #0a1520; color: #00d4ff; }
+        td { color: #8ab4c4; }
+        .logout-btn { position: absolute; top: 15px; right: 15px; padding: 6px 12px; background: #ff6b6b; color: #fff; border: none; border-radius: 6px; font-size: 11px; cursor: pointer; }
+        .header-wrap { position: relative; }
+        .empty-tip { text-align: center; color: #5a8a9a; padding: 30px; font-size: 13px; }
+        .balance-card { background: linear-gradient(135deg, #1a2a3a 0%, #0a1520 100%); border: 1px solid #00d4ff30; border-radius: 12px; padding: 20px; margin: 15px 0; text-align: center; }
+        .balance-label { font-size: 12px; color: #5a8a9a; }
+        .balance-value { font-size: 28px; font-weight: 700; color: #00d4ff; margin: 5px 0; }
+        .balance-sub { font-size: 11px; color: #5a8a9a; }
+        .withdraw-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #2a4a5a; }
+        .withdraw-row:last-child { border-bottom: none; }
+        .withdraw-status { padding: 3px 8px; border-radius: 4px; font-size: 10px; }
+        .withdraw-status.pending { background: #3a2a1a; color: #ffa500; }
+        .withdraw-status.approved { background: #1a3a4a; color: #4caf50; }
+        .withdraw-status.rejected { background: #3a1a1a; color: #ff6b6b; }
+        .error-msg { color: #ff6b6b; font-size: 12px; text-align: center; margin-top: 8px; }
+        .success-msg { color: #4caf50; font-size: 12px; text-align: center; margin-top: 8px; }
+        .page-title { color: #00d4ff; font-size: 16px; font-weight: 600; margin-bottom: 15px; text-align: center; }
+        .login-box, .form-box { max-width: 360px; margin: 0 auto; }
+        .login-logo { text-align: center; margin-bottom: 20px; }
+        .login-tabs { display: flex; gap: 20px; justify-content: center; margin-bottom: 20px; }
+        .login-tab { font-size: 14px; color: #5a8a9a; cursor: pointer; padding: 5px 0; border-bottom: 2px solid transparent; }
+        .login-tab.active { color: #00d4ff; border-bottom-color: #00d4ff; }
+        .charger-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .charger-name { color: #00d4ff; font-size: 14px; font-weight: 600; }
+        .charger-info { font-size: 11px; color: #5a8a9a; margin-top: 2px; }
+            @media(max-width: 400px) { .container { padding: 12px; border-radius: 12px; } .brand-logo {width: 70px; height: 70px; background: #000; } .btn { min-height: 48px; } .form-input { font-size: 16px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="lang-switch">
+            <button class="lang-btn active" onclick="setLang('vi')" data-lang="vi">VI</button>
+            <button class="lang-btn" onclick="setLang('zh')" data-lang="zh">CN</button>
+            <button class="lang-btn" onclick="setLang('en')" data-lang="en">EN</button>
+        </div>
+        <!-- Login -->
+        <div id="loginPage">
+            <div class="login-box">
+                <div class="login-logo">
+                    <div class="brand-logo" style="margin-bottom:10px;">
+                        <img src="logo.png" alt="DX" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                        <div style="display:none;width:60px;height:60px;align-items:center;justify-content:center;font-size:24px;color:#000;font-weight:bold;">DX</div>
+                    </div>
+                    <div class="brand-name" data-i18n="brandName">Blue Light</div>
+                    <div class="brand-sub" data-i18n="merchantPortal">Quan ly Merchant</div>
+                </div>
+
+                <div class="login-tabs">
+                    <div class="login-tab active" onclick="showLoginTab('login')" data-i18n="login">Dang nhap</div>
+                    <div class="login-tab" onclick="showLoginTab('register')" data-i18n="register">Dang ky</div>
+                    <div class="login-tab" onclick="showLoginTab('forgot')" data-i18n="forgotPassword">Quen mat khau</div>
+                </div>
+
+                <div id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="phone">So dien thoai</label>
+                        <input type="tel" class="form-input" id="loginPhone" data-i18n-placeholder="enterPhone" placeholder="Nhap so dien thoai">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="password">Mat khau</label>
+                        <input type="password" class="form-input" id="loginPassword" data-i18n-placeholder="enterPassword" placeholder="Nhap mat khau">
+                    </div>
+                    <button class="btn btn-primary" onclick="doLogin()" data-i18n="login">Dang nhap</button>
+                    <p id="loginError" class="error-msg" style="display:none;"></p>
+                </div>
+
+                <div id="registerForm" style="display:none;">
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="phone">So dien thoai</label>
+                        <input type="tel" class="form-input" id="regPhone" data-i18n-placeholder="enterPhone" placeholder="Nhap so dien thoai">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="merchantName">Ten merchant</label>
+                        <input type="text" class="form-input" id="regName" data-i18n-placeholder="enterMerchantName" placeholder="Nhap ten merchant">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="password">Mat khau</label>
+                        <input type="password" class="form-input" id="regPassword" data-i18n-placeholder="setPassword" placeholder="Dat mat khau">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="verificationCode">Ma xac minh</label>
+                        <div class="code-input-group">
+                            <input type="text" class="form-input" id="regCode" data-i18n-placeholder="enterCode" placeholder="Nhap ma xac minh" maxlength="4">
+                            <button class="code-btn" id="regCodeBtn" onclick="sendRegCode()" data-i18n="getCode">Lay ma</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="doRegister()" data-i18n="register">Dang ky</button>
+                    <p id="regError" class="error-msg" style="display:none;"></p>
+                </div>
+
+                <div id="forgotForm" style="display:none;">
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="phone">So dien thoai</label>
+                        <input type="tel" class="form-input" id="forgotPhone" data-i18n-placeholder="enterPhone" placeholder="Nhap so dien thoai">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="newPassword">Mat khau moi</label>
+                        <input type="password" class="form-input" id="forgotPassword" data-i18n-placeholder="enterNewPassword" placeholder="Nhap mat khau moi">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="verificationCode">Ma xac minh</label>
+                        <div class="code-input-group">
+                            <input type="text" class="form-input" id="forgotCode" data-i18n-placeholder="enterCode" placeholder="Nhap ma xac minh" maxlength="4">
+                            <button class="code-btn" id="forgotCodeBtn" onclick="sendForgotCode()" data-i18n="getCode">Lay ma</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="resetPassword()" data-i18n="resetPassword">Dat lai mat khau</button>
+                    <p id="forgotError" class="error-msg" style="display:none;"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main -->
+        <div id="mainPage" style="display:none;">
+            <div class="header-wrap">
+                <button class="logout-btn" onclick="logout()" data-i18n="logout">Thoat</button>
+                <div class="brand-header">
+                    <div class="brand-logo">
+                        <img src="logo.png" alt="DX" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                        <div style="display:none;width:50px;height:50px;align-items:center;justify-content:center;font-size:20px;color:#000;font-weight:bold;">DX</div>
+                    </div>
+                    <div class="brand-name" style="font-size:18px;" data-i18n="brandNameMerchant">Blue Light - Merchant</div>
+                    <p class="brand-sub" id="welcomeText" data-i18n="welcome">Chao mung</p>
+                </div>
+            </div>
+
+            <div class="nav-bar">
+                <button class="nav-btn" onclick="showTab('stats')" data-i18n="navStats">Thong ke</button>
+                <button class="nav-btn" onclick="showTab('chargers')" data-i18n="navChargers">Tram sac</button>
+                <button class="nav-btn" onclick="showTab('orders')" data-i18n="navOrders">Don hang</button>
+                <button class="nav-btn" onclick="showTab('balance')" data-i18n="navBalance">So du</button>
+                <button class="nav-btn" onclick="showTab('settings')" data-i18n="navSettings">Cai dat</button>
+            </div>
+
+            <div class="section" id="statsSection">
+                <div class="stat-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="statTodayIncome">0</div>
+                        <div class="stat-label" data-i18n="todayIncome">Thu nhap hom nay (VND)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statTodayOrders">0</div>
+                        <div class="stat-label" data-i18n="todayOrders">Don hang hom nay</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statMonthIncome">0</div>
+                        <div class="stat-label" data-i18n="monthIncome">Thu nhap thang nay (VND)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statChargers">0</div>
+                        <div class="stat-label" data-i18n="chargerCount">So tram sac</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" id="chargersSection">
+                <p class="page-title" data-i18n="myChargers">Tram sac cua toi</p>
+                <div class="card">
+                    <button class="btn btn-secondary" style="font-size:12px;" onclick="openScanModal()" data-i18n="scanAdd">Quet ma them thiet bi</button>
+                </div>
+                <div id="chargerList"></div>
+            </div>
+
+            <div class="section" id="ordersSection">
+                <p class="page-title" data-i18n="orderList">Danh sach don hang</p>
+                <div class="filter-bar">
+                    <select id="orderChargerFilter" onchange="loadOrders()">
+                        <option value="" data-i18n="allChargers">Tat ca tram sac</option>
+                    </select>
+                    <input type="date" id="orderDateFrom" onchange="loadOrders()">
+                    <input type="date" id="orderDateTo" onchange="loadOrders()">
+                    <select id="orderStatusFilter" onchange="loadOrders()">
+                        <option value="" data-i18n="allStatus">Tat ca trang thai</option>
+                        <option value="waiting" data-i18n="statusWaiting">Cho</option>
+                        <option value="charging" data-i18n="statusCharging">Dang sac</option>
+                        <option value="completed" data-i18n="statusCompleted">Hoan thanh</option>
+                        <option value="failed" data-i18n="statusFailed">That bai</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="resetOrderFilters()" data-i18n="reset">Dat lai</button>
+                </div>
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th data-i18n="thOrderNo">Ma don</th>
+                                <th data-i18n="thCharger">Tram sac</th>
+                                <th data-i18n="thPort">Cong</th>
+                                <th data-i18n="thPhone">So DT</th>
+                                <th data-i18n="thAmount">So tien</th>
+                                <th data-i18n="thStatus">Trang thai</th>
+                                <th data-i18n="thTime">Thoi gian</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section" id="balanceSection">
+                <p class="page-title" data-i18n="accountBalance">So du tai khoan</p>
+                <div class="balance-card">
+                    <div class="balance-label" data-i18n="availableBalance">So du rut duoc</div>
+                    <div class="balance-value" id="availableBalance">0</div>
+                    <div class="balance-sub"><span data-i18n="totalBalanceLabel">Tong so du:</span> <span id="totalBalance">0</span> | <span data-i18n="frozenLabel">Dong bang:</span> <span id="frozenBalance">0</span> | <span data-i18n="pendingLabel">Cho duyet:</span> <span id="pendingWithdrawal">0</span></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title" data-i18n="applyWithdraw">Yeu cau rut tien</div>
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="withdrawAmount">So tien rut (VND)</label>
+                        <input type="number" class="form-input" id="withdrawAmount" data-i18n-placeholder="enterWithdrawAmount" placeholder="Nhap so tien rut">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="bankName">Ten ngan hang</label>
+                        <input type="text" class="form-input" id="bankName" placeholder="MB Bank">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="bankAccount">So tai khoan</label>
+                        <input type="text" class="form-input" id="bankAccount" data-i18n-placeholder="enterBankAccount" placeholder="Nhap so tai khoan">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="accountHolder">Ten chu tai khoan</label>
+                        <input type="text" class="form-input" id="accountHolder" data-i18n-placeholder="enterAccountHolder" placeholder="Nhap ten chu tai khoan">
+                    </div>
+                    <button class="btn btn-primary" onclick="applyWithdraw()" data-i18n="submitWithdraw">Gui yeu cau rut tien</button>
+                    <p id="withdrawMsg" class="error-msg" style="display:none;"></p>
+                </div>
+
+                <div class="card">
+                    <div class="card-title" data-i18n="withdrawHistory">Lich su rut tien</div>
+                    <div id="withdrawalList"></div>
+                </div>
+
+                <p style="font-size:11px;color:#5a8a9a;text-align:center;margin-top:10px;" data-i18n="withdrawNote">Ghi chu: He thong se thu phi theo ty le chia se, phan merchant duoc se chuyen vao tai khoan ngan hang cua ban.</p>
+            </div>
+
+            <div class="section" id="settingsSection">
+                <p class="page-title" data-i18n="accountSettings">Cai dat tai khoan</p>
+                <div class="card">
+                    <div class="card-title" data-i18n="changePassword">Doi mat khau</div>
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="oldPassword">Mat khau cu</label>
+                        <input type="password" class="form-input" id="oldPassword" data-i18n-placeholder="enterOldPassword" placeholder="Nhap mat khau cu">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="newPassword">Mat khau moi</label>
+                        <input type="password" class="form-input" id="newPassword" data-i18n-placeholder="enterNewPassword" placeholder="Nhap mat khau moi">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="confirmPassword">Xac nhan mat khau moi</label>
+                        <input type="password" class="form-input" id="confirmPassword" data-i18n-placeholder="enterConfirmPassword" placeholder="Nhap lai mat khau moi">
+                    </div>
+                    <button class="btn btn-primary" onclick="changePassword()" data-i18n="confirmChange">Xac nhan doi</button>
+                    <p id="changePwdMsg" class="error-msg" style="display:none;"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scan Modal -->
+    <div id="scanModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:1000;align-items:center;justify-content:center;">
+        <div style="background:#111;border-radius:15px;padding:20px;max-width:400px;width:90%;border:1px solid #1a3a4a;">
+            <h3 style="color:#00d4ff;text-align:center;margin-bottom:15px;" data-i18n="scanAddTitle">Quet ma them tram sac</h3>
+            <div class="form-group">
+                <label class="form-label" data-i18n="deviceInfo">Thong tin thiet bi</label>
+                <textarea class="form-input" id="scanData" rows="3" data-i18n-placeholder="pasteScan" placeholder="Dinh dang JSON hoac thong tin thiet bi"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label" data-i18n="chargerNameLabel">Ten tram sac</label>
+                <input type="text" class="form-input" id="chargerName" data-i18n-placeholder="chargerNameEx" placeholder="VD: Tram A01">
+            </div>
+            <div class="form-group">
+                <label class="form-label" data-i18n="locationLabel">Vi tri lap dat</label>
+                <input type="text" class="form-input" id="chargerLocation" data-i18n-placeholder="locationEx" placeholder="VD: Quan Tay Ho, Ha Noi">
+            </div>
+            <div style="display:flex;gap:10px;margin-top:15px;">
+                <button class="btn btn-secondary" style="flex:1;" onclick="closeScanModal()" data-i18n="cancel">Huy</button>
+                <button class="btn btn-primary" style="flex:1;" onclick="addChargerFromScan()" data-i18n="confirmAdd">Xac nhan them</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3000'
+            : 'https://charger-control-api.vercel.app';
+
+        let token = localStorage.getItem('merchant_token') || '';
+        let merchantName = localStorage.getItem('merchant_name') || '';
+        let statusPollInterval = null;
+        let merchantChargers = [];
+
+        const i18n = {
+            vi: {
+                brandName: 'Đèn Xanh Nhỏ',
+                brandNameMerchant: 'Đèn Xanh Nhỏ - Merchant',
+                merchantPortal: 'Quản lý Merchant',
+                login: 'Đăng nhập', register: 'Đăng ký', forgotPassword: 'Quên mật khẩu',
+                phone: 'Số điện thoại', password: 'Mật khẩu', newPassword: 'Mật khẩu mới', confirmPassword: 'Xác nhận mật khẩu mới',
+                merchantName: 'Tên merchant',
+                verificationCode: 'Mã xác minh', getCode: 'Lấy mã', resend: 'Gửi lại',
+                enterPhone: 'Nhập số điện thoại', enterPassword: 'Nhập mật khẩu', setPassword: 'Đặt mật khẩu',
+                enterMerchantName: 'Nhập tên merchant', enterCode: 'Nhập mã xác minh',
+                enterNewPassword: 'Nhập mật khẩu mới', enterOldPassword: 'Nhập mật khẩu cũ',
+                enterConfirmPassword: 'Nhập lại mật khẩu mới',
+                resetPassword: 'Đặt lại mật khẩu', confirmChange: 'Xác nhận đổi',
+                logout: 'Thoát', welcome: 'Chào mừng',
+                navStats: 'Thống kê', navChargers: 'Trạm sạc', navOrders: 'Đơn hàng', navBalance: 'Số dư', navSettings: 'Cài đặt',
+                todayIncome: 'Thu nhập hôm nay (VND)', todayOrders: 'Đơn hàng hôm nay',
+                monthIncome: 'Thu nhập tháng này (VND)', chargerCount: 'Số trạm sạc',
+                myChargers: 'Trạm sạc của tôi', scanAdd: 'Quét mã thêm thiết bị',
+                noChargers: 'Chưa có trạm sạc, vui lòng quét mã thêm',
+                online: 'Trực tuyến', offline: 'Ngoại tuyến',
+                portIdle: 'Trống', portCharging: 'Đang sạc',
+                orderList: 'Danh sách đơn hàng', allChargers: 'Tất cả trạm sạc',
+                allStatus: 'Tất cả trạng thái', statusWaiting: 'Chờ', statusCharging: 'Đang sạc',
+                statusCompleted: 'Hoàn thành', statusFailed: 'Thất bại', reset: 'Đặt lại',
+                thOrderNo: 'Mã đơn', thCharger: 'Trạm sạc', thPort: 'Cổng', thPhone: 'Số ĐT',
+                thAmount: 'Số tiền', thStatus: 'Trạng thái', thTime: 'Thời gian',
+                noOrders: 'Chưa có đơn hàng',
+                accountBalance: 'Số dư tài khoản',
+                availableBalance: 'Số dư rút được', totalBalanceLabel: 'Tổng số dư:',
+                frozenLabel: 'Đóng băng:', pendingLabel: 'Chờ duyệt:',
+                applyWithdraw: 'Yêu cầu rút tiền',
+                withdrawAmount: 'Số tiền rút (VND)', enterWithdrawAmount: 'Nhập số tiền rút',
+                bankName: 'Tên ngân hàng', bankAccount: 'Số tài khoản',
+                enterBankAccount: 'Nhập số tài khoản',
+                accountHolder: 'Tên chủ tài khoản', enterAccountHolder: 'Nhập tên chủ tài khoản',
+                submitWithdraw: 'Gửi yêu cầu rút tiền',
+                withdrawHistory: 'Lịch sử rút tiền',
+                noWithdrawals: 'Chưa có lịch sử rút tiền',
+                withdrawNote: 'Ghi chú: Hệ thống sẽ thu phí theo tỷ lệ chia sẻ, phần merchant được sẽ chuyển vào tài khoản ngân hàng của bạn.',
+                accountSettings: 'Cài đặt tài khoản', changePassword: 'Đổi mật khẩu',
+                scanAddTitle: 'Quét mã thêm trạm sạc',
+                deviceInfo: 'Thông tin thiết bị', pasteScan: 'Dán kết quả quét mã',
+                chargerNameLabel: 'Tên trạm sạc', chargerNameEx: 'VD: Trạm A01',
+                locationLabel: 'Vị trí lắp đặt', locationEx: 'VD: Quận Tây Hồ, Hà Nội',
+                cancel: 'Hủy', confirmAdd: 'Xác nhận thêm',
+                enterPhonePass: 'Vui lòng nhập số điện thoại và mật khẩu',
+                loginSuccess: 'Đăng nhập thành công',
+                fillAll: 'Vui lòng điền đầy đủ thông tin',
+                registerSuccess: 'Đăng ký thành công, vui lòng chờ quản trị viên phê duyệt',
+                resetSuccess: 'Đặt lại mật khẩu thành công',
+                networkError: 'Lỗi mạng',
+                codeSent: 'Đã gửi', seconds: 'giây',
+                confirmStart: 'Xác nhận khởi động cổng {port} sạc {duration} phút?',
+                confirmStop: 'Xác nhận dừng cổng {port}?',
+                enterValidDuration: 'Vui lòng nhập thời gian hợp lệ (phút)',
+                operationFailed: 'Thao tác thất bại',
+                deviceAdded: 'Thiết bị đã được thêm thành công',
+                addFailed: 'Thêm thất bại',
+                enterDeviceInfo: 'Vui lòng nhập thông tin thiết bị',
+                invalidFormat: 'Định dạng thông tin thiết bị không đúng',
+                enterCorrectAmount: 'Vui lòng nhập số tiền đúng',
+                enterBankInfo: 'Vui lòng điền đầy đủ thông tin ngân hàng',
+                withdrawSubmitted: 'Yêu cầu rút tiền đã được gửi',
+                passwordMismatch: 'Hai mật khẩu không khớp',
+                passwordChanged: 'Đổi mật khẩu thành công',
+                statusMap: { waiting: 'Chờ', charging: 'Đang sạc', completed: 'Hoàn thành', failed: 'Thất bại' },
+                withdrawStatus: { pending: 'Chờ duyệt', approved: 'Đã phê duyệt', rejected: 'Đã từ chối' },
+                type2port: '2 cổng', type10port: '10 cổng', noLocation: 'Chưa đặt vị trí',
+                start: 'Khởi động', stop: 'Dừng', minutes: 'phút'
+            },
+            en: {
+                brandName: 'Blue Light',
+                brandNameMerchant: 'Blue Light - Merchant',
+                merchantPortal: 'Merchant Portal',
+                login: 'Login', register: 'Register', forgotPassword: 'Forgot Password',
+                phone: 'Phone Number', password: 'Password', newPassword: 'New Password', confirmPassword: 'Confirm New Password',
+                merchantName: 'Merchant Name',
+                verificationCode: 'Verification Code', getCode: 'Get Code', resend: 'Resend',
+                enterPhone: 'Enter phone number', enterPassword: 'Enter password', setPassword: 'Set password',
+                enterMerchantName: 'Enter merchant name', enterCode: 'Enter verification code',
+                enterNewPassword: 'Enter new password', enterOldPassword: 'Enter old password',
+                enterConfirmPassword: 'Re-enter new password',
+                resetPassword: 'Reset Password', confirmChange: 'Confirm Change',
+                logout: 'Logout', welcome: 'Welcome',
+                navStats: 'Statistics', navChargers: 'Chargers', navOrders: 'Orders', navBalance: 'Balance', navSettings: 'Settings',
+                todayIncome: "Today's Income (VND)", todayOrders: "Today's Orders",
+                monthIncome: "Monthly Income (VND)", chargerCount: 'Charger Count',
+                myChargers: 'My Chargers', scanAdd: 'Scan to Add Device',
+                noChargers: 'No chargers, please scan to add',
+                online: 'Online', offline: 'Offline',
+                portIdle: 'Idle', portCharging: 'Charging',
+                orderList: 'Order List', allChargers: 'All Chargers',
+                allStatus: 'All Status', statusWaiting: 'Waiting', statusCharging: 'Charging',
+                statusCompleted: 'Completed', statusFailed: 'Failed', reset: 'Reset',
+                thOrderNo: 'Order No.', thCharger: 'Charger', thPort: 'Port', thPhone: 'Phone',
+                thAmount: 'Amount', thStatus: 'Status', thTime: 'Time',
+                noOrders: 'No orders yet',
+                accountBalance: 'Account Balance',
+                availableBalance: 'Available Balance', totalBalanceLabel: 'Total Balance:',
+                frozenLabel: 'Frozen:', pendingLabel: 'Pending:',
+                applyWithdraw: 'Apply for Withdrawal',
+                withdrawAmount: 'Withdrawal Amount (VND)', enterWithdrawAmount: 'Enter withdrawal amount',
+                bankName: 'Bank Name', bankAccount: 'Bank Account Number',
+                enterBankAccount: 'Enter bank account number',
+                accountHolder: 'Account Holder Name', enterAccountHolder: 'Enter account holder name',
+                submitWithdraw: 'Submit Withdrawal Request',
+                withdrawHistory: 'Withdrawal History',
+                noWithdrawals: 'No withdrawal history',
+                withdrawNote: 'Note: The platform charges a commission. The merchant share will be transferred to your bank account.',
+                accountSettings: 'Account Settings', changePassword: 'Change Password',
+                scanAddTitle: 'Scan to Add Charger',
+                deviceInfo: 'Device Info', pasteScan: 'Paste scan result',
+                chargerNameLabel: 'Charger Name', chargerNameEx: 'E.g. Station A01',
+                locationLabel: 'Installation Location', locationEx: 'E.g. Tay Ho District, Hanoi',
+                cancel: 'Cancel', confirmAdd: 'Confirm Add',
+                enterPhonePass: 'Please enter phone number and password',
+                loginSuccess: 'Login successful',
+                fillAll: 'Please fill in all information',
+                registerSuccess: 'Registration successful, please wait for admin approval',
+                resetSuccess: 'Password reset successful',
+                networkError: 'Network error',
+                codeSent: 'Sent', seconds: 's',
+                confirmStart: 'Confirm start port {port} charging for {duration} minutes?',
+                confirmStop: 'Confirm stop port {port}?',
+                enterValidDuration: 'Please enter a valid duration (minutes)',
+                operationFailed: 'Operation failed',
+                deviceAdded: 'Device added successfully',
+                addFailed: 'Add failed',
+                enterDeviceInfo: 'Please enter device information',
+                invalidFormat: 'Invalid device information format',
+                enterCorrectAmount: 'Please enter a correct amount',
+                enterBankInfo: 'Please fill in complete bank information',
+                withdrawSubmitted: 'Withdrawal request submitted',
+                passwordMismatch: 'Passwords do not match',
+                passwordChanged: 'Password changed successfully',
+                statusMap: { waiting: 'Waiting', charging: 'Charging', completed: 'Completed', failed: 'Failed' },
+                withdrawStatus: { pending: 'Pending', approved: 'Approved', rejected: 'Rejected' },
+                type2port: '2 ports', type10port: '10 ports', noLocation: 'No location set',
+                start: 'Start', stop: 'Stop', minutes: 'min'
+            },
+            zh: {
+                brandName: '小蓝灯',
+                brandNameMerchant: '小蓝灯 - 商户',
+                merchantPortal: '商户后台',
+                login: '登录', register: '注册', forgotPassword: '忘记密码',
+                phone: '手机号', password: '密码', newPassword: '新密码', confirmPassword: '确认新密码',
+                merchantName: '商户名称',
+                verificationCode: '验证码', getCode: '获取验证码', resend: '重新发送',
+                enterPhone: '请输入手机号', enterPassword: '请输入密码', setPassword: '设置密码',
+                enterMerchantName: '请输入商户名称', enterCode: '请输入验证码',
+                enterNewPassword: '请输入新密码', enterOldPassword: '请输入旧密码',
+                enterConfirmPassword: '请再次输入新密码',
+                resetPassword: '重置密码', confirmChange: '确认修改',
+                logout: '退出', welcome: '欢迎',
+                navStats: '统计', navChargers: '充电桩', navOrders: '订单', navBalance: '余额', navSettings: '设置',
+                todayIncome: '今日收入 (VND)', todayOrders: '今日订单',
+                monthIncome: '本月收入 (VND)', chargerCount: '充电桩数量',
+                myChargers: '我的充电桩', scanAdd: '扫码添加设备',
+                noChargers: '暂无充电桩，请扫码添加',
+                online: '在线', offline: '离线',
+                portIdle: '空闲', portCharging: '充电中',
+                orderList: '订单列表', allChargers: '全部充电桩',
+                allStatus: '全部状态', statusWaiting: '等待', statusCharging: '充电中',
+                statusCompleted: '已完成', statusFailed: '失败', reset: '重置',
+                thOrderNo: '订单号', thCharger: '充电桩', thPort: '端口', thPhone: '手机号',
+                thAmount: '金额', thStatus: '状态', thTime: '时间',
+                noOrders: '暂无订单',
+                accountBalance: '账户余额',
+                availableBalance: '可提现余额', totalBalanceLabel: '总余额：',
+                frozenLabel: '冻结：', pendingLabel: '待审批：',
+                applyWithdraw: '申请提现',
+                withdrawAmount: '提现金额 (VND)', enterWithdrawAmount: '请输入提现金额',
+                bankName: '银行名称', bankAccount: '银行账号',
+                enterBankAccount: '请输入银行账号',
+                accountHolder: '账户持有人', enterAccountHolder: '请输入账户持有人',
+                submitWithdraw: '提交提现申请',
+                withdrawHistory: '提现记录',
+                noWithdrawals: '暂无提现记录',
+                withdrawNote: '说明：平台将按比例收取佣金，商户分成将转入您的银行账户。',
+                accountSettings: '账户设置', changePassword: '修改密码',
+                scanAddTitle: '扫码添加充电桩',
+                deviceInfo: '设备信息', pasteScan: '粘贴扫码结果',
+                chargerNameLabel: '充电桩名称', chargerNameEx: '例：A01站点',
+                locationLabel: '安装位置', locationEx: '例：河内市西湖区',
+                cancel: '取消', confirmAdd: '确认添加',
+                enterPhonePass: '请输入手机号和密码',
+                loginSuccess: '登录成功',
+                fillAll: '请填写完整信息',
+                registerSuccess: '注册成功，请等待管理员审批',
+                resetSuccess: '密码重置成功',
+                networkError: '网络错误',
+                codeSent: '已发送', seconds: '秒',
+                confirmStart: '确认启动端口{port}充电{duration}分钟？',
+                confirmStop: '确认停止端口{port}？',
+                enterValidDuration: '请输入有效时长（分钟）',
+                operationFailed: '操作失败',
+                deviceAdded: '设备添加成功',
+                addFailed: '添加失败',
+                enterDeviceInfo: '请输入设备信息',
+                invalidFormat: '设备信息格式不正确',
+                enterCorrectAmount: '请输入正确金额',
+                enterBankInfo: '请填写完整银行信息',
+                withdrawSubmitted: '提现申请已提交',
+                passwordMismatch: '两次密码不一致',
+                passwordChanged: '密码修改成功',
+                statusMap: { waiting: '等待', charging: '充电中', completed: '已完成', failed: '失败' },
+                withdrawStatus: { pending: '待审批', approved: '已批准', rejected: '已拒绝' },
+                type2port: '2口', type10port: '10口', noLocation: '未设置位置',
+                start: '启动', stop: '停止', minutes: '分钟'
+            }
+        };
+
+        let currentLang = localStorage.getItem('lang') || 'vi';
+
+        function t(key, vars) {
+            let text = i18n[currentLang]?.[key] || i18n['en'][key] || key;
+            if (vars) {
+                Object.keys(vars).forEach(k => {
+                    text = text.replace(new RegExp('{' + k + '}', 'g'), vars[k]);
+                });
+            }
+            return text;
+        }
+
+        function setLang(lang) {
+            currentLang = lang;
+            localStorage.setItem('lang', lang);
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+            applyTranslations();
+            if (merchantChargers.length) loadChargers();
+            loadOrders();
+            loadBalance();
+        }
+
+        function applyTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                el.textContent = t(el.dataset.i18n);
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                el.placeholder = t(el.dataset.i18nPlaceholder);
+            });
+        }
+
+        window.onload = function() { setLang(currentLang); if (token) showMainPage(); };
+
+        function authHeaders() { return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }; }
+
+        function showLoginTab(tab) {
+            document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('forgotForm').style.display = 'none';
+            if (tab === 'login') document.getElementById('loginForm').style.display = 'block';
+            else if (tab === 'register') document.getElementById('registerForm').style.display = 'block';
+            else document.getElementById('forgotForm').style.display = 'block';
+        }
+
+        async function sendLoginCode() {
+            const phone = document.getElementById('loginPhone').value.trim();
+            if (!phone) { showErr('loginError', t('enterPhone')); return; }
+            const btn = document.getElementById('loginCodeBtn');
+            if (btn) { btn.disabled = true; }
+        }
+
+        async function sendRegCode() {
+            const phone = document.getElementById('regPhone').value.trim();
+            if (!phone) { showErr('regError', t('enterPhone')); return; }
+            const btn = document.getElementById('regCodeBtn');
+            btn.disabled = true;
+            try {
+                const resp = await fetch(`${API_BASE}/api/auth/merchant/send-register-code`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone }) });
+                const data = await resp.json();
+                if (data.code === 200) { alert(t('codeSent') + ': ' + (data.data.dev_code || '')); startCd(btn, 60); }
+                else { showErr('regError', data.msg); btn.disabled = false; }
+            } catch (e) { showErr('regError', t('networkError')); btn.disabled = false; }
+        }
+
+        async function sendForgotCode() {
+            const phone = document.getElementById('forgotPhone').value.trim();
+            if (!phone) { showErr('forgotError', t('enterPhone')); return; }
+            const btn = document.getElementById('forgotCodeBtn');
+            btn.disabled = true;
+            try {
+                const resp = await fetch(`${API_BASE}/api/auth/merchant/forgot-send-code`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone }) });
+                const data = await resp.json();
+                if (data.code === 200) { alert(t('codeSent') + ': ' + (data.data.dev_code || '')); startCd(btn, 60); }
+                else { showErr('forgotError', data.msg); btn.disabled = false; }
+            } catch (e) { showErr('forgotError', t('networkError')); btn.disabled = false; }
+        }
+
+        function startCd(btn, s) {
+            let n = s;
+            const tmr = setInterval(() => {
+                btn.textContent = --n + ' ' + t('seconds');
+                if (n <= 0) { clearInterval(tmr); btn.textContent = t('resend'); btn.disabled = false; }
+            }, 1000);
+        }
+
+        function showErr(id, msg) { const e = document.getElementById(id); e.textContent = msg; e.style.display = 'block'; }
+        function showOk(id, msg) { const e = document.getElementById(id); e.textContent = msg; e.className = 'success-msg'; e.style.display = 'block'; setTimeout(() => { e.style.display = 'none'; e.className = 'error-msg'; }, 3000); }
+
+        async function doLogin() {
+            const phone = document.getElementById('loginPhone').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            if (!phone || !password) { showErr('loginError', t('enterPhonePass')); return; }
+            try {
+                const resp = await fetch(`${API_BASE}/api/auth/merchant/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone, password }) });
+                const data = await resp.json();
+                if (data.code === 200) {
+                    token = data.data.token; merchantName = data.data.name;
+                    localStorage.setItem('merchant_token', token);
+                    localStorage.setItem('merchant_name', merchantName);
+                    showMainPage();
+                } else { showErr('loginError', data.msg); }
+            } catch (e) { showErr('loginError', t('networkError')); }
+        }
+
+        async function doRegister() {
+            const phone = document.getElementById('regPhone').value.trim();
+            const name = document.getElementById('regName').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            const code = document.getElementById('regCode').value.trim();
+            if (!phone || !name || !password || !code) { showErr('regError', t('fillAll')); return; }
+            try {
+                const resp = await fetch(`${API_BASE}/api/auth/merchant/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone, name, password, code }) });
+                const data = await resp.json();
+                if (data.code === 200) { alert(t('registerSuccess')); showLoginTab('login'); }
+                else { showErr('regError', data.msg); }
+            } catch (e) { showErr('regError', t('networkError')); }
+        }
+
+        async function resetPassword() {
+            const phone = document.getElementById('forgotPhone').value.trim();
+            const newPassword = document.getElementById('forgotPassword').value.trim();
+            const code = document.getElementById('forgotCode').value.trim();
+            if (!phone || !newPassword || !code) { showErr('forgotError', t('fillAll')); return; }
+            try {
+                const resp = await fetch(`${API_BASE}/api/auth/merchant/reset-password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone, newPassword, code }) });
+                const data = await resp.json();
+                if (data.code === 200) { alert(t('resetSuccess')); showLoginTab('login'); }
+                else { showErr('forgotError', data.msg); }
+            } catch (e) { showErr('forgotError', t('networkError')); }
+        }
+
+        function logout() {
+            token = '';
+            localStorage.removeItem('merchant_token');
+            localStorage.removeItem('merchant_name');
+            document.getElementById('loginPage').style.display = 'block';
+            document.getElementById('mainPage').style.display = 'none';
+        }
+
+        function showMainPage() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('mainPage').style.display = 'block';
+            document.getElementById('welcomeText').textContent = t('welcome') + ', ' + merchantName;
+            loadStats(); loadChargers(); loadOrders(); loadBalance();
+            if (statusPollInterval) clearInterval(statusPollInterval);
+            statusPollInterval = setInterval(() => { if (token) loadChargers(); }, 30000);
+        }
+
+        function showTab(tab) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tab + 'Section').classList.add('active');
+            event.target.classList.add('active');
+            if (tab === 'balance') loadBalance();
+        }
+
+        async function loadStats() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/merchant/stats`, { headers: authHeaders() });
+                const data = await resp.json();
+                if (data.code === 200) {
+                    const d = data.data;
+                    document.getElementById('statTodayIncome').textContent = (d.today.total_income || 0).toLocaleString();
+                    document.getElementById('statTodayOrders').textContent = d.today.order_count || 0;
+                    document.getElementById('statMonthIncome').textContent = (d.month.total_income || 0).toLocaleString();
+                    document.getElementById('statChargers').textContent = d.charger_count || 0;
+                }
+            } catch (e) {}
+        }
+
+        async function loadChargers() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/merchant/chargers-realtime-status`, { headers: authHeaders() });
+                const data = await resp.json();
+                const list = document.getElementById('chargerList');
+                if (data.code !== 200 || data.data.length === 0) { list.innerHTML = '<div class="empty-tip">' + t('noChargers') + '</div>'; merchantChargers = []; return; }
+
+                merchantChargers = data.data;
+                updateOrderChargerFilter();
+
+                list.innerHTML = data.data.map(c => {
+                    const typeText = c.port_count <= 2 ? t('type2port') : t('type10port');
+                    const statusText = c.platform_online === true ? t('online') : (c.platform_online === false ? t('offline') : (c.status === 'online' ? t('online') : t('offline')));
+                    const statusClass = c.platform_online === true ? 'platform-online' : (c.platform_online === false ? 'platform-offline' : (c.status === 'online' ? 'platform-online' : 'platform-offline'));
+                    const portsHtml = c.ports.map(p => `
+                        <div class="port-status-item ${p.status}">
+                            <div class="port-num">${p.port_number}</div>
+                            <div class="port-label">${p.status === 'charging' ? t('portCharging') : t('portIdle')}</div>
+                            <div class="port-controls">
+                                <input type="number" id="dur-${c.id}-${p.port_number}" placeholder="${t('minutes')}" min="1" max="1440" value="60">
+                                <div class="port-controls-row">
+                                    <button class="control-btn start" onclick="remoteStart(${c.id},${p.port_number})">${t('start')}</button>
+                                    <button class="control-btn stop" onclick="remoteStop(${c.id},${p.port_number})">${t('stop')}</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    return `<div class="card">
+                        <div class="charger-header">
+                            <div><div class="charger-name">${c.name}</div><div class="charger-info">${typeText} | IMEI: ${c.imei} | ${c.location || t('noLocation')}</div></div>
+                            <span class="badge badge-active ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="ports-grid">${portsHtml}</div>
+                    </div>`;
+                }).join('');
+            } catch (e) {}
+        }
+
+        function updateOrderChargerFilter() {
+            const select = document.getElementById('orderChargerFilter');
+            const currentVal = select.value;
+            let html = '<option value="">' + t('allChargers') + '</option>';
+            merchantChargers.forEach(c => {
+                html += `<option value="${c.id}">${c.name}</option>`;
+            });
+            select.innerHTML = html;
+            if (currentVal) select.value = currentVal;
+        }
+
+        async function remoteStart(chargerId, portNumber) {
+            const input = document.getElementById(`dur-${chargerId}-${portNumber}`);
+            const duration = parseInt(input ? input.value : 60);
+            if (!duration || duration < 1) { alert(t('enterValidDuration')); return; }
+            if (!confirm(t('confirmStart', { port: portNumber, duration: duration }))) return;
+            try {
+                const resp = await fetch(`${API_BASE}/api/merchant/control/start`, { method: 'POST', headers: authHeaders(), body: JSON.stringify({ charger_id: chargerId, port_number: portNumber, duration: duration }) });
+                const data = await resp.json();
+                alert(data.msg);
+                if (data.code === 200) loadChargers();
+            } catch (e) { alert(t('operationFailed')); }
+        }
+
+        async function remoteStop(chargerId, portNumber) {
+            if (!confirm(t('confirmStop', { port: portNumber }))) return;
+            try {
+                const resp = await fetch(`${API_BASE}/api/merchant/control/stop`, { method: 'POST', headers: authHeaders(), body: JSON.stringify({ charger_id: chargerId, port_number: portNumber }) });
+                const data = await resp.json();
+                alert(data.msg);
+                if (data.code === 200) loadChargers();
+            } catch (e) { alert(t('operationFailed')); }
+        }
+
+        async function loadOrders() {
+            try {
+                const chargerId = document.getElementById('orderChargerFilter').value;
+                const dateFrom = document.getElementById('orderDateFrom').value;
+                const dateTo = document.getElementById('orderDateTo').value;
+                const status = document.getElementById('orderStatusFilter').value;
+                let url = `${API_BASE}/api/order/merchant-list?limit=50`;
+                if (chargerId) url += `&charger_id=${chargerId}`;
+                if (dateFrom) url += `&date_from=${dateFrom}`;
+                if (dateTo) url += `&date_to=${dateTo}`;
+                if (status) url += `&status=${status}`;
+
+                const resp = await fetch(url, { headers: authHeaders() });
+                const data = await resp.json();
+                const tbody = document.getElementById('orderTableBody');
+                const sm = t('statusMap');
+                if (!data.data || !data.data.orders || data.data.orders.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#5a8a9a;padding:20px;">' + t('noOrders') + '</td></tr>'; return; }
+                tbody.innerHTML = data.data.orders.map(o => `<tr><td style="font-size:10px;">${o.order_no}</td><td>${o.charger_name || '-'}</td><td>${o.port_number}</td><td>${o.user_phone}</td><td>${(o.amount || 0).toLocaleString()}</td><td>${sm[o.charge_status] || o.charge_status}</td><td style="font-size:10px;">${o.created_at ? o.created_at.slice(0, 16) : '-'}</td></tr>`).join('');
+            } catch (e) {}
+        }
+
+        function resetOrderFilters() {
+            document.getElementById('orderChargerFilter').value = '';
+            document.getElementById('orderDateFrom').value = '';
+            document.getElementById('orderDateTo').value = '';
+            document.getElementById('orderStatusFilter').value = '';
+            loadOrders();
+        }
+
+        async function loadBalance() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/merchant/balance`, { headers: authHeaders() });
+                const data = await resp.json();
+                if (data.code === 200) {
+                    document.getElementById('availableBalance').textContent = (data.data.available_balance || 0).toLocaleString();
+                    document.getElementById('totalBalance').textContent = (data.data.balance || 0).toLocaleString();
+                    document.getElementById('frozenBalance').textContent = (data.data.frozen_balance || 0).toLocaleString();
+                    document.getElementById('pendingWithdrawal').textContent = (data.data.pending_withdrawal || 0).toLocaleString();
+                }
+                const wResp = await fetch(`${API_BASE}/api/merchant/withdrawals`, { headers: authHeaders() });
+                const wData = await wResp.json();
+                const wList = document.getElementById('withdrawalList');
+                const ws = t('withdrawStatus');
+                if (wData.data.length === 0) { wList.innerHTML = '<div class="empty-tip">' + t('noWithdrawals') + '</div>'; }
+                else { wList.innerHTML = wData.data.map(w => `<div class="withdraw-row"><div><div style="color:#00d4ff;font-size:13px;">${(w.amount || 0).toLocaleString()} VND</div><div style="font-size:10px;color:#5a8a9a;">${w.created_at ? w.created_at.slice(0, 16) : '-'}</div></div><span class="withdraw-status ${w.status}">${ws[w.status] || w.status}</span></div>`).join(''); }
+            } catch (e) {}
+        }
+
+        async function applyWithdraw() {
+            const amount = parseInt(document.getElementById('withdrawAmount').value);
+            const bank_name = document.getElementById('bankName').value.trim();
+            const bank_account = document.getElementById('bankAccount').value.trim();
+            const account_holder = document.getElementById('accountHolder').value.trim();
+            if (!amount || amount <= 0) { showErr('withdrawMsg', t('enterCorrectAmount')); return; }
+            if (!bank_name || !bank_account || !account_holder) { showErr('withdrawMsg', t('enterBankInfo')); return; }
+            try {
+                const resp = await fetch(`${API_BASE}/api/merchant/withdraw`, { method: 'POST', headers: authHeaders(), body: JSON.stringify({ amount, bank_name, bank_account, account_holder }) });
+                const data = await resp.json();
+                if (data.code === 200) { alert(t('withdrawSubmitted')); document.getElementById('withdrawAmount').value = ''; loadBalance(); }
+                else { showErr('withdrawMsg', data.msg); }
+            } catch (e) { showErr('withdrawMsg', t('networkError')); }
+        }
+
+        async function changePassword() {
+            const oldPassword = document.getElementById('oldPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            if (!oldPassword || !newPassword) { showErr('changePwdMsg', t('fillAll')); return; }
+            if (newPassword !== confirmPassword) { showErr('changePwdMsg', t('passwordMismatch')); return; }
+            try {
+                const resp = await fetch(`${API_BASE}/api/auth/merchant/change-password`, { method: 'POST', headers: authHeaders(), body: JSON.stringify({ oldPassword, newPassword }) });
+                const data = await resp.json();
+                if (data.code === 200) { showOk('changePwdMsg', t('passwordChanged')); document.getElementById('oldPassword').value = ''; document.getElementById('newPassword').value = ''; document.getElementById('confirmPassword').value = ''; }
+                else { showErr('changePwdMsg', data.msg); }
+            } catch (e) { showErr('changePwdMsg', t('networkError')); }
+        }
+
+        function openScanModal() { document.getElementById('scanModal').style.display = 'flex'; }
+        function closeScanModal() { document.getElementById('scanModal').style.display = 'none'; document.getElementById('scanData').value = ''; document.getElementById('chargerName').value = ''; document.getElementById('chargerLocation').value = ''; }
+
+        async function addChargerFromScan() {
+            const scanData = document.getElementById('scanData').value.trim();
+            const name = document.getElementById('chargerName').value.trim();
+            const location = document.getElementById('chargerLocation').value.trim();
+            if (!scanData) { alert(t('enterDeviceInfo')); return; }
+
+            let deviceInfo;
+            try { deviceInfo = JSON.parse(scanData); } catch (e) {
+                const parts = scanData.split(/[\s\n]+/);
+                deviceInfo = { device_id: parts[0] || '', imei: parts[1] || '', token: parts[2] || '', cookie: parts[3] || '', model: parts[4] || '10port', port_count: parseInt(parts[5]) || 10 };
+            }
+
+            if (!deviceInfo.device_id && !deviceInfo.imei) { alert(t('invalidFormat')); return; }
+
+            try {
+                const resp = await fetch(`${API_BASE}/api/auth/device/register`, { method: 'POST', headers: authHeaders(), body: JSON.stringify({ device_id: deviceInfo.device_id || '', imei: deviceInfo.imei || deviceInfo.device_id || '', token: deviceInfo.token || '', cookie: deviceInfo.cookie || '', model: deviceInfo.model || '10port', port_count: deviceInfo.port_count || 10, location, name: name || `Tram sac ${deviceInfo.device_id || deviceInfo.imei}` }) });
+                const data = await resp.json();
+                if (data.code === 200) { alert(t('deviceAdded')); closeScanModal(); loadChargers(); loadStats(); }
+                else { alert(data.msg); }
+            } catch (e) { alert(t('addFailed')); }
+        }
+    </script>
+</body>
+</html>

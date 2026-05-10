@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小蓝灯 - 支付</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+        body { background: #0a0a0a; min-height: 100vh; padding: 15px; }
+        .container { max-width: 420px; margin: 0 auto; background: #111; border-radius: 20px; padding: 25px; border: 1px solid #1a3a4a; }
+        .brand-header { text-align: center; margin-bottom: 15px; }
+        .brand-logo {width: 80px; height: 80px; margin: 0 auto 8px; background: #000; }
+        .brand-logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 0; background: none; }
+        .brand-name { font-size: 20px; font-weight: 700; color: #00d4ff; text-shadow: 0 0 15px #00d4ff50; }
+        h2 { text-align: center; color: #00d4ff; margin-bottom: 15px; font-size: 18px; text-shadow: 0 0 10px #00d4ff30; }
+        .info-card { background: #1a2a3a; border-radius: 14px; padding: 15px; margin: 10px 0; border: 1px solid #2a4a5a; }
+        .info-card p { margin: 6px 0; font-size: 13px; color: #8ab4c4; }
+        .info-card span { font-weight: 700; color: #00d4ff; }
+        .amount-display { font-size: 32px; font-weight: 700; text-align: center; color: #00d4ff; margin: 15px 0; text-shadow: 0 0 20px #00d4ff50; }
+        .order-no-box { background: #1a2a3a; border-radius: 10px; padding: 12px; text-align: center; margin: 10px 0; border: 1px solid #2a4a5a; }
+        .order-no-box .label { font-size: 12px; color: #5a8a9a; }
+        .order-no-box .value { font-size: 16px; font-weight: 700; color: #00d4ff; letter-spacing: 1px; margin-top: 4px; }
+        .qr-section { background: #1a2a3a; border-radius: 15px; padding: 20px; text-align: center; margin: 15px 0; border: 2px dashed #2a4a5a; }
+        .qr-section p { color: #5a8a9a; font-size: 13px; margin-top: 10px; }
+        .qr-placeholder { width: 150px; height: 150px; margin: 0 auto; background: #fff; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+        .qr-placeholder img { max-width: 100%; max-height: 100%; }
+        .transfer-info { background: #1a2a3a; border-radius: 12px; padding: 15px; margin: 10px 0; border: 1px solid #2a4a5a; }
+        .transfer-info p { font-size: 13px; color: #8ab4c4; margin: 6px 0; }
+        .transfer-info strong { color: #ffa500; }
+        .transfer-title { font-size: 13px; font-weight: 600; color: #ffa500; margin-bottom: 8px; }
+        .status { font-size: 14px; font-weight: 600; text-align: center; margin: 12px 0; padding: 10px; border-radius: 10px; }
+        .status.waiting { color: #ffa500; background: #2a2010; }
+        .status.checking { color: #00d4ff; background: #1a2a3a; }
+        .status.success { color: #4caf50; background: #1a2a1a; }
+        .status.error { color: #ff6b6b; background: #2a1a1a; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; margin: 8px 0; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #00d4ff 0%, #0088aa 100%); color: #000; box-shadow: 0 4px 15px #00d4ff40; }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-secondary { background: #2a3a4a; color: #5a8a9a; border: 1px solid #2a4a5a; }
+        .btn-success { background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%); color: #fff; }
+        .countdown { font-size: 12px; color: #5a8a9a; text-align: center; margin-top: 8px; }
+        .tip { font-size: 11px; color: #5a8a9a; text-align: center; margin-top: 10px; }
+            @media(max-width: 400px) { .container { padding: 12px; border-radius: 12px; } .brand-logo {width: 70px; height: 70px; background: #000; } .btn { min-height: 48px; } .form-input { font-size: 16px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="brand-header">
+            <div class="brand-logo">
+                <img src="logo.png" alt="DX" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                <div style="display:none;width:80px;height:80px;align-items:center;justify-content:center;font-size:24px;color:#00d4ff;font-weight:bold;text-shadow:0 0 10px #00d4ff50;">DX</div>
+            </div>
+            <div class="brand-name">小蓝灯</div>
+        </div>
+
+        <h2>订单支付</h2>
+
+        <div class="info-card">
+            <p>充电桩：<span id="chargerName">-</span></p>
+            <p>充电口：<span id="portNum">-</span> 号</p>
+            <p>充电时长：<span id="duration">-</span></p>
+        </div>
+
+        <div class="amount-display" id="amountDisplay">0 VND</div>
+
+        <div class="order-no-box">
+            <div class="label">订单号（填入转账备注）</div>
+            <div class="value" id="orderNoDisplay">-</div>
+        </div>
+
+        <!-- 二维码展示区 -->
+        <div class="qr-section">
+            <div class="qr-placeholder" id="qrPlaceholder">
+                <div style="text-align:center;color:#999;font-size:12px;">二维码<br>扫码支付</div>
+            </div>
+            <p>请使用手机银行扫描上方二维码支付</p>
+        </div>
+
+        <div class="transfer-info">
+            <div class="transfer-title">或转账到以下账户：</div>
+            <p>银行：<strong>MB Bank</strong></p>
+            <p>账号：<strong>0901234567</strong></p>
+            <p>户名：<strong>DEN XANH NHO</strong></p>
+            <p>备注：<strong id="transferContent">-</strong></p>
+        </div>
+
+        <div class="status waiting" id="statusBox">等待支付中...</div>
+        <div class="countdown" id="countdown"></div>
+
+        <button class="btn btn-primary" id="mockPayBtn" onclick="mockPay()">模拟支付（测试用）</button>
+        <button class="btn btn-secondary" onclick="goBack()">返回</button>
+
+        <div class="tip">系统每10秒自动检查支付状态，支付成功后将自动启动充电</div>
+
+        <!-- 求助按钮 -->
+        <button class="btn" style="background: #3a2a1a; color: #ffa500; border: 1px solid #ffa50030; margin-top: 15px;" onclick="showHelpModal()">遇到问题？联系商户</button>
+    </div>
+
+    <!-- 求助弹窗 -->
+    <div id="helpModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:100;align-items:center;justify-content:center;">
+        <div style="background:#1a2a3a;border:1px solid #2a4a5a;border-radius:16px;padding:20px;max-width:360px;width:90%;margin:auto;">
+            <h3 style="color:#00d4ff;text-align:center;margin-bottom:15px;font-size:16px;">联系商户求助</h3>
+            <p style="font-size:12px;color:#5a8a9a;margin-bottom:10px;text-align:center;">输入您的手机号，查询订单或联系商户</p>
+            <input type="tel" class="form-input" id="helpPhoneInput" placeholder="请输入您的手机号" style="margin-bottom:12px;">
+            <button class="btn btn-primary" onclick="queryOrderByPhone()">查询我的订单</button>
+            <button class="btn" style="background:#2a4a3a;color:#4caf50;border:1px solid #4caf5030;margin-top:8px;" onclick="openZalo()">打开 Zalo 联系商户</button>
+            <button class="btn btn-secondary" onclick="hideHelpModal()" style="margin-top:8px;">取消</button>
+            <div id="helpOrderResult" style="margin-top:12px;display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3000'
+            : 'https://charger-control-api.vercel.app';
+
+        let orderNo = '';
+        let pollTimer = null;
+        let countdownSec = 10;
+
+        window.onload = function() {
+            const params = new URLSearchParams(window.location.search);
+            orderNo = params.get('order_no') || '';
+            const amount = params.get('amount') || 0;
+            const charger = params.get('charger') || '-';
+            const port = params.get('port') || '-';
+            const duration = params.get('duration') || 0;
+
+            document.getElementById('chargerName').textContent = decodeURIComponent(charger);
+            document.getElementById('portNum').textContent = port;
+            document.getElementById('amountDisplay').textContent = parseInt(amount).toLocaleString() + ' VND';
+            document.getElementById('orderNoDisplay').textContent = orderNo;
+            document.getElementById('transferContent').textContent = orderNo;
+
+            const hours = Math.floor(duration / 60);
+            const mins = duration % 60;
+            if (hours > 0 && mins > 0) {
+                document.getElementById('duration').textContent = `${hours}小时${mins}分钟`;
+            } else if (hours > 0) {
+                document.getElementById('duration').textContent = `${hours}小时`;
+            } else {
+                document.getElementById('duration').textContent = `${mins}分钟`;
+            }
+
+            // 生成支付二维码（这里用订单号生成一个占位图，实际项目中可调用支付网关API获取真实二维码）
+            generateQRCode(orderNo, amount);
+
+            startPolling();
+        };
+
+        function generateQRCode(orderNo, amount) {
+            // 实际项目中，这里应该调用后端API获取支付二维码URL
+            // 这里使用一个模拟的二维码生成器
+            const placeholder = document.getElementById('qrPlaceholder');
+            
+            // 使用一个公开的QR码生成服务
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent('MBDENXANH:' + orderNo + '|' + amount)}`;
+            
+            placeholder.innerHTML = `<img src="${qrUrl}" alt="支付二维码" onerror="this.parentElement.innerHTML='<div style=\\'text-align:center;color:#999;font-size:12px;\\'>二维码加载失败<br>请使用下方转账</div>'">`;
+        }
+
+        function startPolling() {
+            countdownSec = 10;
+            updateCountdown();
+            pollTimer = setInterval(() => {
+                countdownSec--;
+                updateCountdown();
+                if (countdownSec <= 0) {
+                    checkPaymentStatus();
+                    countdownSec = 10;
+                }
+            }, 1000);
+        }
+
+        function updateCountdown() {
+            document.getElementById('countdown').textContent = `自动检查倒计时：${countdownSec} 秒`;
+        }
+
+        async function checkPaymentStatus() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/order/status/${orderNo}`);
+                const data = await resp.json();
+                if (data.code === 200 && data.data.payment_status === 'paid') {
+                    clearInterval(pollTimer);
+                    showSuccess();
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        async function mockPay() {
+            const btn = document.getElementById('mockPayBtn');
+            btn.disabled = true;
+            document.getElementById('statusBox').textContent = '正在确认支付...';
+            document.getElementById('statusBox').className = 'status checking';
+
+            try {
+                const resp = await fetch(`${API_BASE}/api/order/mock-pay`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ order_no: orderNo })
+                });
+                const data = await resp.json();
+                if (data.code === 200) {
+                    clearInterval(pollTimer);
+                    showSuccess();
+                } else {
+                    document.getElementById('statusBox').textContent = data.msg || '支付失败';
+                    document.getElementById('statusBox').className = 'status error';
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                document.getElementById('statusBox').textContent = '网络错误，请重试';
+                document.getElementById('statusBox').className = 'status error';
+                btn.disabled = false;
+            }
+        }
+
+        function showSuccess() {
+            document.getElementById('statusBox').textContent = '支付成功！正在启动充电...';
+            document.getElementById('statusBox').className = 'status success';
+            document.getElementById('countdown').textContent = '';
+            document.getElementById('mockPayBtn').style.display = 'none';
+
+            setTimeout(() => {
+                const params = new URLSearchParams(window.location.search);
+                const chargerId = params.get('charger_id') || '';
+                window.location.href = `index.html?charger=${chargerId}&order=${orderNo}&status=charging`;
+            }, 3000);
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function showHelpModal() {
+            document.getElementById('helpModal').style.display = 'flex';
+        }
+
+        function hideHelpModal() {
+            document.getElementById('helpModal').style.display = 'none';
+        }
+
+        function openZalo() {
+            const phone = document.getElementById('helpPhoneInput').value.trim();
+            if (!phone) {
+                alert('请输入手机号');
+                return;
+            }
+            let zaloPhone = phone;
+            if (phone.startsWith('0')) {
+                zaloPhone = '84' + phone.substring(1);
+            }
+            window.open('https://zalo.me/' + zaloPhone, '_blank');
+        }
+
+        async function queryOrderByPhone() {
+            const phone = document.getElementById('helpPhoneInput').value.trim();
+            if (!phone) {
+                alert('请输入手机号');
+                return;
+            }
+            const resultDiv = document.getElementById('helpOrderResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<p style="color:#5a8a9a;font-size:12px;text-align:center;">查询中...</p>';
+
+            try {
+                const resp = await fetch(API_BASE + '/api/order/list?phone=' + encodeURIComponent(phone));
+                const data = await resp.json();
+                if (data.code === 200 && data.data && data.data.length > 0) {
+                    const orders = data.data.slice(0, 5);
+                    resultDiv.innerHTML = '<p style="color:#00d4ff;font-size:13px;margin-bottom:8px;">最近订单：</p>' +
+                        orders.map(o => '<div style="background:#0a1520;border:1px solid #2a4a5a;border-radius:8px;padding:10px;margin:6px 0;font-size:12px;">' +
+                            '<span style="color:#ffa500;">' + o.order_no + '</span> | ' + o.charge_status + ' | ' + (o.amount || 0).toLocaleString() + ' VND<br>' +
+                            '<span style="color:#5a8a9a;">' + (o.created_at ? o.created_at.slice(0, 16) : '-') + '</span>' +
+                        '</div>').join('');
+                } else {
+                    resultDiv.innerHTML = '<p style="color:#5a8a9a;font-size:12px;text-align:center;">未找到该手机号的订单</p>';
+                }
+            } catch (e) {
+                resultDiv.innerHTML = '<p style="color:#ff6b6b;font-size:12px;text-align:center;">查询失败，请重试</p>';
+            }
+        }
+    </script>
+</body>
+</html>

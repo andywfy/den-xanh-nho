@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đèn Xanh Nhỏ - Trạm sạc xe điện</title>
+    <style>
+        /* 全局样式 - 小蓝灯共享充电桩 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e0f7fa 0%, #80deea 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .container {
+            max-width: 420px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 150, 136, 0.2);
+            padding: 25px;
+        }
+
+        /* 河内斗笠Logo - 纯CSS绘制 */
+        .brand-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .brand-logo {
+            width: 100px;
+            height: 70px;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .conical-hat {
+            width: 100px;
+            height: 60px;
+            background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            position: absolute;
+            top: 0;
+            box-shadow: 0 4px 16px rgba(0, 188, 212, 0.4);
+        }
+
+        .hat-brim {
+            width: 110px;
+            height: 10px;
+            background: linear-gradient(135deg, #0097a7 0%, #00796b 100%);
+            position: absolute;
+            bottom: 0;
+            border-radius: 50%;
+        }
+
+        .brand-logo span {
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            font-style: italic;
+            position: relative;
+            z-index: 1;
+            margin-top: -10px;
+            letter-spacing: 2px;
+        }
+
+        .brand-name {
+            font-size: 26px;
+            font-weight: 700;
+            color: #0097a7;
+            margin-bottom: 5px;
+        }
+
+        .brand-name-en {
+            font-size: 14px;
+            color: #00bcd4;
+            font-weight: 500;
+            margin-top: 3px;
+        }
+
+        /* 三语切换按钮 */
+        .lang-switch {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+
+        .lang-btn {
+            padding: 5px 12px;
+            border: 2px solid #00bcd4;
+            background: white;
+            color: #0097a7;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 3px;
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);
+            color: white;
+        }
+
+        h2 {
+            text-align: center;
+            color: #006064;
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 22px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 14px rgba(0, 188, 212, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0, 151, 167, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff5252 0%, #d32f2f 100%);
+            color: white;
+            box-shadow: 0 4px 14px rgba(255, 82, 82, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(211, 47, 47, 0.4);
+        }
+
+        .info-card {
+            background: #e0f7fa;
+            border-radius: 14px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #00bcd4;
+        }
+
+        .info-card p {
+            margin: 12px 0;
+            font-size: 15px;
+            color: #006064;
+        }
+
+        .info-card span {
+            font-weight: 700;
+            color: #004d40;
+        }
+
+        /* 充电桩号显示样式 */
+        .station-display {
+            background: #b2ebf2;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .station-display p {
+            font-size: 16px;
+            color: #00796b;
+            margin: 0;
+        }
+
+        .station-display .station-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0097a7;
+            margin-top: 5px;
+        }
+
+        select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #b2ebf2;
+            border-radius: 12px;
+            font-size: 16px;
+            color: #006064;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #00bcd4;
+            box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.2);
+        }
+
+        .select-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: #00796b;
+            margin-top: 12px;
+            display: block;
+        }
+
+        /* 充电时长选择卡片 */
+        .duration-card {
+            background: #f0f9ff;
+            border-radius: 12px;
+            padding: 18px;
+            margin: 15px 0;
+            border: 2px solid #bae6fd;
+        }
+
+        .duration-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .duration-option:hover {
+            border-color: #00bcd4;
+            background: #e0f7fa;
+        }
+
+        .duration-option.selected {
+            border-color: #0097a7;
+            background: #b2ebf2;
+        }
+
+        .duration-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #006064;
+        }
+
+        .price-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0097a7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 三语切换 -->
+        <div class="lang-switch">
+            <button class="lang-btn active" onclick="switchLang('vi')">Tiếng Việt</button>
+            <button class="lang-btn" onclick="switchLang('en')">English</button>
+            <button class="lang-btn" onclick="switchLang('zh')">中文</button>
+        </div>
+
+        <!-- 小蓝灯斗笠Logo -->
+        <div class="brand-header">
+            <div class="brand-logo">
+                <div class="conical-hat"></div>
+                <div class="hat-brim"></div>
+                <span>ĐX</span>
+            </div>
+            <div class="brand-name" id="brandName">Đèn Xanh Nhỏ</div>
+            <div class="brand-name-en" id="brandNameEn">Little Blue Light</div>
+        </div>
+
+        <h2 id="pageTitle">Quét mã sạc</h2>
+        
+        <!-- 自动显示充电桩号 -->
+        <div class="info-card">
+            <div class="station-display">
+                <p id="stationLabel">Trạm sạc hiện tại：</p>
+                <div class="station-number" id="stationNumber">Trạm sạc 01</div>
+            </div>
+
+            <label class="select-label" id="plugLabel">Chọn phích cắm：</label>
+            <select id="plugSelect">
+                <option value="1">Phích cắm 1</option>
+                <option value="2">Phích cắm 2</option>
+                <option value="3">Phích cắm 3</option>
+            </select>
+        </div>
+
+        <!-- 调整后的充电套餐 -->
+        <div class="duration-card">
+            <p class="select-label" id="durationLabel">Chọn gói sạc：</p>
+            
+            <div class="duration-option selected" onclick="selectDuration(this, 3, 10000)">
+                <span class="duration-text" id="duration1">3 giờ</span>
+                <span class="price-text">10.000 VND</span>
+            </div>
+            
+            <div class="duration-option" onclick="selectDuration(this, 6, 20000)">
+                <span class="duration-text" id="duration2">6 giờ</span>
+                <span class="price-text">20.000 VND</span>
+            </div>
+            
+            <div class="duration-option" onclick="selectDuration(this, 9, 30000)">
+                <span class="duration-text" id="duration3">9 giờ</span>
+                <span class="price-text">30.000 VND</span>
+            </div>
+            
+            <div class="duration-option" onclick="selectDuration(this, 24, 50000)">
+                <span class="duration-text" id="duration4">24 giờ</span>
+                <span class="price-text">50.000 VND</span>
+            </div>
+        </div>
+        
+        <button class="btn btn-primary" onclick="startCharge()" id="startBtn">Thanh toán và sạc ngay</button>
+        
+        <div class="info-card">
+            <p id="statusLabel">Trạng thái sạc：<span id="status">Chưa bắt đầu</span></p>
+            <p id="timeLabel">Thời gian đã sạc：<span id="time">0 phút</span></p>
+            <p id="remainingLabel">Thời gian còn lại：<span id="remaining">0 phút</span></p>
+        </div>
+        
+        <button class="btn btn-danger" onclick="stopCharge()" id="stopBtn">Kết thúc sạc</button>
+    </div>
+
+    <script>
+        // 三语文本配置
+        const texts = {
+            vi: {
+                brandName: "Đèn Xanh Nhỏ",
+                brandNameEn: "Little Blue Light",
+                pageTitle: "Quét mã sạc",
+                stationLabel: "Trạm sạc hiện tại：",
+                plugLabel: "Chọn phích cắm：",
+                durationLabel: "Chọn gói sạc：",
+                duration1: "3 giờ",
+                duration2: "6 giờ",
+                duration3: "9 giờ",
+                duration4: "24 giờ",
+                startBtn: "Thanh toán và sạc ngay",
+                statusLabel: "Trạng thái sạc：",
+                status: "Chưa bắt đầu",
+                charging: "Đang sạc",
+                finished: "Đã kết thúc",
+                timeLabel: "Thời gian đã sạc：",
+                time: "0 phút",
+                remainingLabel: "Thời gian còn lại：",
+                remaining: "0 phút",
+                stopBtn: "Kết thúc sạc",
+                startAlert: "Đã gửi lệnh khởi động",
+                stopAlert: "Đã kết thúc sạc",
+                timeUpAlert: "Thời gian sạc đã hết"
+            },
+            en: {
+                brandName: "Little Blue Light",
+                brandNameEn: "Đèn Xanh Nhỏ",
+                pageTitle: "Scan to Charge",
+                stationLabel: "Current Station：",
+                plugLabel: "Select Plug：",
+                durationLabel: "Select Charging Plan：",
+                duration1: "3 hours",
+                duration2: "6 hours",
+                duration3: "9 hours",
+                duration4: "24 hours",
+                startBtn: "Pay & Start Charging",
+                statusLabel: "Charging Status：",
+                status: "Not Started",
+                charging: "Charging",
+                finished: "Completed",
+                timeLabel: "Charging Time：",
+                time: "0 minutes",
+                remainingLabel: "Remaining Time：",
+                remaining: "0 minutes",
+                stopBtn: "Stop Charging",
+                startAlert: "Start command sent",
+                stopAlert: "Charging stopped",
+                timeUpAlert: "Charging time expired"
+            },
+            zh: {
+                brandName: "小蓝灯",
+                brandNameEn: "Little Blue Light",
+                pageTitle: "扫码充电",
+                stationLabel: "当前充电桩：",
+                plugLabel: "选择插头：",
+                durationLabel: "选择充电套餐：",
+                duration1: "3小时",
+                duration2: "6小时",
+                duration3: "9小时",
+                duration4: "24小时",
+                startBtn: "立即支付并充电",
+                statusLabel: "充电状态：",
+                status: "未开始",
+                charging: "充电中",
+                finished: "已完成",
+                timeLabel: "已充电时长：",
+                time: "0分钟",
+                remainingLabel: "剩余时长：",
+                remaining: "0分钟",
+                stopBtn: "结束充电",
+                startAlert: "已发送启动指令",
+                stopAlert: "充电已结束",
+                timeUpAlert: "充电时间已到"
+            }
+        };
+
+        let currentLang = 'vi';
+        let timer = null;
+        let minutes = 0;
+        let selectedDuration = 180;
+        let remainingMinutes = 180;
+        let currentStation = "01";
+
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const station = urlParams.get('station');
+            if (station) {
+                currentStation = station;
+                updateStationDisplay();
+            }
+            switchLang('vi');
+        }
+
+        function updateStationDisplay() {
+            const t = texts[currentLang];
+            document.getElementById('stationNumber').textContent = 
+                currentLang === 'zh' ? `充电桩 ${currentStation}` : 
+                currentLang === 'en' ? `Station ${currentStation}` : 
+                `Trạm sạc ${currentStation}`;
+        }
+
+        function switchLang(lang) {
+            currentLang = lang;
+            const t = texts[lang];
+            
+            document.getElementById('brandName').textContent = t.brandName;
+            document.getElementById('brandNameEn').textContent = t.brandNameEn;
+            document.getElementById('pageTitle').textContent = t.pageTitle;
+            document.getElementById('stationLabel').textContent = t.stationLabel;
+            document.getElementById('plugLabel').textContent = t.plugLabel;
+            document.getElementById('durationLabel').textContent = t.durationLabel;
+            document.getElementById('duration1').textContent = t.duration1;
+            document.getElementById('duration2').textContent = t.duration2;
+            document.getElementById('duration3').textContent = t.duration3;
+            document.getElementById('duration4').textContent = t.duration4;
+            document.getElementById('startBtn').textContent = t.startBtn;
+            document.getElementById('statusLabel').textContent = t.statusLabel;
+            document.getElementById('status').textContent = t.status;
+            document.getElementById('timeLabel').textContent = t.timeLabel;
+            document.getElementById('time').textContent = t.time;
+            document.getElementById('remainingLabel').textContent = t.remainingLabel;
+            document.getElementById('remaining').textContent = t.remaining;
+            document.getElementById('stopBtn').textContent = t.stopBtn;
+
+            updateStationDisplay();
+
+            const plugSelect = document.getElementById('plugSelect');
+            plugSelect.innerHTML = `
+                <option value="1">${currentLang === 'zh' ? '插头 1' : currentLang === 'en' ? 'Plug 1' : 'Phích cắm 1'}</option>
+                <option value="2">${currentLang === 'zh' ? '插头 2' : currentLang === 'en' ? 'Plug 2' : 'Phích cắm 2'}</option>
+                <option value="3">${currentLang === 'zh' ? '插头 3' : currentLang === 'en' ? 'Plug 3' : 'Phích cắm 3'}</option>
+            `;
+
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function selectDuration(element, hours, price) {
+            document.querySelectorAll('.duration-option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedDuration = hours * 60;
+            remainingMinutes = selectedDuration;
+        }
+
+        function startCharge() {
+            const t = texts[currentLang];
+            const plug = document.getElementById('plugSelect').value;
+            
+            document.getElementById('status').innerHTML = 
+                currentLang === 'zh' ? '<span style="color: #00c853;">充电中</span>' : 
+                currentLang === 'en' ? '<span style="color: #00c853;">Charging</span>' : 
+                '<span style="color: #00c853;">Đang sạc</span>';
+            
+            minutes = 0;
+            remainingMinutes = selectedDuration;
+            
+            timer = setInterval(() => {
+                minutes++;
+                remainingMinutes--;
+                
+                document.getElementById('time').textContent = minutes + 
+                    (currentLang === 'zh' ? '分钟' : currentLang === 'en' ? ' minutes' : ' phút');
+                document.getElementById('remaining').textContent = remainingMinutes + 
+                    (currentLang === 'zh' ? '分钟' : currentLang === 'en' ? ' minutes' : ' phút');
+                
+                if (remainingMinutes <= 0) stopCharge(true);
+            }, 1000); // 部署时改为60000
+            
+            console.log(`启动充电桩 ${currentStation}，插头 ${plug}，时长 ${selectedDuration}分钟`);
+            alert(t.startAlert);
+        }
+
+        function stopCharge(isTimeUp = false) {
+            clearInterval(timer);
+            const t = texts[currentLang];
+            
+            document.getElementById('status').innerHTML = 
+                currentLang === 'zh' ? '<span style="color: #d32f2f;">已完成</span>' : 
+                currentLang === 'en' ? '<span style="color: #d32f2f;">Completed</span>' : 
+                '<span style="color: #d32f2f;">Đã kết thúc</span>';
+            
+            alert(isTimeUp ? t.timeUpAlert : t.stopAlert);
+        }
+    </script>
+</body>
+</html>

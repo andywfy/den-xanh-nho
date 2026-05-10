@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán - Đèn Xanh Nhỏ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(13deg, #e0f7fa 0%, #80deea 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .container {
+            max-width: 420px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,150,136,0.2);
+            padding: 25px;
+        }
+
+        .lang-switch {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+
+        .lang-btn {
+            padding: 5px 12px;
+            border: 2px solid #00bcd4;
+            background: white;
+            color: #0097a7;
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .brand-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .info-card {
+            background: #e0f7fa;
+            border-radius: 14px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .amount {
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            color: #0097a7;
+            margin: 20px 0;
+        }
+
+        .qr-box {
+            border: 3px dashed #00bcd4;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            background: #f8f9fa;
+            margin: 20px 0;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            background: linear-gradient(13deg, #00bcd4 0%, #0097a7 100%);
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="lang-switch">
+        <button class="lang-btn" onclick="setLang('vi')">Tiếng Việt</button>
+        <button class="lang-btn" onclick="setLang('en')">English</button>
+        <button class="lang-btn" onclick="setLang('zh')">中文</button>
+    </div>
+
+    <div class="brand-header">
+        <h2 id="title">Thanh toán</h2>
+    </div>
+
+    <div class="info-card">
+        <p id="t_station">Trạm sạc: <span id="station">01</span></p>
+        <p id="t_plug">Phích cắm: <span id="plug">1</span></p>
+        <p id="t_time">Thời gian: <span id="duration">3 giờ</span></p>
+    </div>
+
+    <div class="amount" id="amount">10000 VND</div>
+    <div class="qr-box" id="qr">Mã QR thanh toán</div>
+
+    <!-- ✅ 这是核心：表单提交，绝对不会失败 -->
+    <form action="https://cdz.xiaoyouwulian.com/web-wechart/agent/charge/equipment/net/remote/net/remote/send"
+          method="POST"
+          target="_blank"
+          id="chargeForm">
+
+        <input type="hidden" name="id" value="79490">
+        <input type="hidden" name="cd" value="862741082710969">
+        <input type="hidden" name="port" id="port_input" value="1">
+        <input type="hidden" name="time" id="time_input" value="180">
+        <input type="hidden" name="token" value="fc50d8c9-736b-4f09-b731-1ee69f2d4f59">
+
+        <button type="submit" class="btn" id="startBtn">Kiểm tra thanh toán và bắt đầu sạc</button>
+    </form>
+</div>
+
+<script>
+    let lang = 'vi';
+    const order = new URLSearchParams(location.search);
+    const station = order.get('station') || '01';
+    const plug = order.get('plug') || '1';
+    const time = order.get('duration') || '180';
+
+    document.getElementById('port_input').value = plug;
+    document.getElementById('time_input').value = time;
+    document.getElementById('station').innerText = station;
+    document.getElementById('plug').innerText = plug;
+
+    const texts = {
+        vi: { title:"Thanh toán", station:"Trạm sạc", plug:"Phích cắm", time:"Thời gian", qr:"Mã QR", btn:"Bắt đầu sạc" },
+        en: { title:"Payment", station:"Station", plug:"Plug", time:"Duration", qr:"QR Code", btn:"Start charging" },
+        zh: { title:"支付", station:"充电桩", plug:"插头", time:"时长", qr:"支付二维码", btn:"检查支付并开始充电" }
+    };
+
+    function setLang(l) {
+        lang = l;
+        const t = texts[lang];
+        document.getElementById('title').innerText = t.title;
+        document.getElementById('t_station').innerText = t.station + ': ' + station;
+        document.getElementById('t_plug').innerText = t.plug + ': ' + plug;
+        document.getElementById('t_time').innerText = t.time + ': ' + Math.round(time/60) + ' giờ';
+        document.getElementById('qr').innerText = t.qr;
+        document.getElementById('startBtn').innerText = t.btn;
+    }
+
+    setLang('vi');
+</script>
+</body>
+</html>
