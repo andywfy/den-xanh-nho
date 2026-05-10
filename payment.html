@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小蓝灯 - 支付中心</title>
+    <!-- 和index.html完全统一的全局样式 -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        /* 顶部导航栏（和index.html完全一致） */
+        .navbar {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .navbar .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        .navbar .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+        .navbar .nav-links a:hover {
+            color: #3498db;
+        }
+        /* 主体容器 */
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .page-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            border-left: 4px solid #3498db;
+            padding-left: 10px;
+        }
+        /* 订单卡片样式 */
+        .order-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .order-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .order-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .info-item {
+            font-size: 16px;
+        }
+        .info-item label {
+            font-weight: bold;
+            color: #666;
+        }
+        /* 支付方式 */
+        .payment-method {
+            margin-bottom: 20px;
+        }
+        .payment-method h3 {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .method-option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        .method-option:hover {
+            border-color: #3498db;
+        }
+        .method-option input {
+            margin-right: 10px;
+        }
+        /* 支付按钮 */
+        .pay-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .pay-btn:hover {
+            background-color: #2980b9;
+        }
+        .pay-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        /* 支付成功模块 */
+        .success-section {
+            display: none; /* 默认隐藏，支付成功后显示 */
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .success-title {
+            color: #27ae60;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        /* 充电桩控制模块 */
+        .charger-control {
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        .charger-status {
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .charger-status.running {
+            color: #27ae60;
+        }
+        .charger-status.stopped {
+            color: #e74c3c;
+        }
+        .charger-btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .charger-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .charger-btn.start {
+            background-color: #27ae60;
+            color: white;
+        }
+        .charger-btn.start:hover {
+            background-color: #219653;
+        }
+        .charger-btn.stop {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .charger-btn.stop:hover {
+            background-color: #c0392b;
+        }
+        .charger-log {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-family: Consolas, monospace;
+            font-size: 13px;
+        }
+        /* 底部版权 */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航（和index.html完全一致） -->
+    <div class="navbar">
+        <div class="logo">小蓝灯 充电桩管理系统</div>
+        <div class="nav-links">
+            <a href="index.html">首页</a>
+            <a href="admin.html">管理后台</a>
+            <a href="payment.html" style="color: #3498db;">支付中心</a>
+            <a href="merchant.html">商家入口</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1 class="page-title">订单支付中心</h1>
+
+        <!-- 订单信息卡片 -->
+        <div class="order-card">
+            <div class="order-title">订单详情</div>
+            <div class="order-info">
+                <div class="info-item"><label>订单号：</label><span id="orderNo">ORD-20260508-001</span></div>
+                <div class="info-item"><label>端口号：</label><span id="portNo">端口 1</span></div>
+                <div class="info-item"><label>充电时长：</label><span id="chargeDuration">60 分钟</span></div>
+                <div class="info-item"><label>应付金额：</label><span id="totalAmount">¥10.00</span></div>
+            </div>
+
+            <!-- 支付方式选择 -->
+            <div class="payment-method">
+                <h3>选择支付方式</h3>
+                <label class="method-option">
+                    <input type="radio" name="paymentMethod" value="wechat" checked>
+                    微信支付
+                </label>
+                <label class="method-option">
+                    <input type="radio" name="paymentMethod" value="alipay">
+                    支付宝
+                </label>
+            </div>
+
+            <!-- 支付按钮 -->
+            <button class="pay-btn" id="payBtn" onclick="handlePayment()">确认支付 ¥10.00</button>
+        </div>
+
+        <!-- 支付成功后的充电桩控制模块（默认隐藏） -->
+        <div class="success-section" id="successSection">
+            <div class="success-title">✅ 支付成功！可控制充电桩启停</div>
+            
+            <div class="charger-control">
+                <div class="charger-status stopped" id="chargerStatus">状态：未启动</div>
+                <div class="charger-btn-group">
+                    <button class="charger-btn start" onclick="startCharger()">启动充电</button>
+                    <button class="charger-btn stop" onclick="stopCharger()">停止充电</button>
+                </div>
+                <div class="charger-log" id="chargerLog">
+                    <div>[系统] 支付已确认，可点击按钮启动充电桩</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部版权 -->
+    <div class="footer">
+        <p>© 2026 小蓝灯充电桩管理系统 | 技术支持：越南分部</p>
+    </div>
+
+    <script>
+        // --------------------------
+        // 配置信息（和index.html保持一致）
+        // --------------------------
+        const API_BASE_URL = "https://charger-control-api.onrender.com";
+        // 订单对应的端口号（可根据实际订单动态修改）
+        const ORDER_PORT = 1;
+        // 订单对应的充电时长（分钟，可根据金额动态设置）
+        const ORDER_DURATION = 60;
+
+        // --------------------------
+        // 模拟支付逻辑
+        // --------------------------
+        function handlePayment() {
+            const payBtn = document.getElementById("payBtn");
+            payBtn.disabled = true;
+            payBtn.textContent = "支付处理中...";
+
+            // 模拟支付请求（实际项目中替换为真实支付接口）
+            setTimeout(() => {
+                // 支付成功，显示充电桩控制模块
+                document.getElementById("successSection").style.display = "block";
+                payBtn.textContent = "支付成功";
+                // 页面滚动到充电桩控制模块
+                document.getElementById("successSection").scrollIntoView({ behavior: "smooth" });
+            }, 1500);
+        }
+
+        // --------------------------
+        // 充电桩控制逻辑（对接Render后端）
+        // --------------------------
+        // 添加日志
+        function addChargerLog(message) {
+            const logDiv = document.getElementById("chargerLog");
+            const entry = document.createElement("div");
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // 更新充电桩状态
+        function updateChargerStatus(status, isRunning) {
+            const statusDiv = document.getElementById("chargerStatus");
+            statusDiv.textContent = `状态：${status}`;
+            statusDiv.className = `charger-status ${isRunning ? "running" : "stopped"}`;
+        }
+
+        // 启动充电桩
+        async function startCharger() {
+            addChargerLog(`收到启动请求，端口：${ORDER_PORT}，时长：${ORDER_DURATION}分钟`);
+            updateChargerStatus("启动中...", false);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/start`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ port: ORDER_PORT, duration: ORDER_DURATION })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    addChargerLog("✅ 充电桩启动成功！");
+                    updateChargerStatus("充电中", true);
+                } else {
+                    addChargerLog("❌ 启动失败：" + (result.error || "未知错误"));
+                    updateChargerStatus("启动失败", false);
+                }
+            } catch (error) {
+                addChargerLog("❌ 请求失败：" + error.message);
+                updateChargerStatus("请求失败", false);
+            }
+        }
+
+        // 停止充电桩
+        async function stopCharger() {
+            addChargerLog(`收到停止请求，端口：${ORDER_PORT}`);
+            updateChargerStatus("停止中...", false);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/stop`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ port: ORDER_PORT })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    addChargerLog("✅ 充电桩停止成功！");
+                    updateChargerStatus("已停止", false);
+                } else {
+                    addChargerLog("❌ 停止失败：" + (result.error || "未知错误"));
+                    updateChargerStatus("停止失败", false);
+                }
+            } catch (error) {
+                addChargerLog("❌ 请求失败：" + error.message);
+                updateChargerStatus("请求失败", false);
+            }
+        }
+    </script>
+</body>
+</html>
