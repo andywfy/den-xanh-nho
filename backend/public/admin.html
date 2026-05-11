@@ -293,8 +293,10 @@
     </div>
 
     <script>
-        // === 部署配置：把下面改成你的服务器公网IP或域名 ===
-        const SERVER_URL = 'https://backend-bay-five-63.vercel.app';
+        // === 部署配置 ===
+        // 前后端放同一台服务器：留空字符串 ''
+        // 前端在GitHub Pages、后端在腾讯云：改成 'http://你的服务器IP:3000'
+        const SERVER_URL = '';
         // ====================================================
         const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:3000'
