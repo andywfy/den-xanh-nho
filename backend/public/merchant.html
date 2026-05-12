@@ -579,7 +579,7 @@
         let currentLang = localStorage.getItem('lang') || 'vi';
 
         function t(key, vars) {
-            let text = i18n[currentLang]?.[key] || i18n['en'][key] || key;
+            let text = (i18n[currentLang] && i18n[currentLang][key]) || i18n['en'][key] || key;
             if (vars) {
                 Object.keys(vars).forEach(k => {
                     text = text.replace(new RegExp('{' + k + '}', 'g'), vars[k]);
